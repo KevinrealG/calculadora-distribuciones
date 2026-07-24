@@ -1,0 +1,138 @@
+/* ==========================================================
+   Pink Theme
+========================================================== */
+
+body.pink{
+
+    --primary:#ec4899;
+    --primary-dark:#db2777;
+
+    --success:#ec4899;
+
+    --background:#fff1f7;
+    --surface:#ffffff;
+
+    --text:#4a044e;
+    --text-light:#9d174d;
+
+    --border:#f9a8d4;
+
+}
+
+/* Fondo */
+
+body.pink{
+
+    background:var(--background);
+
+    color:var(--text);
+
+}
+
+/* Header */
+
+body.pink .top-bar{
+
+    background:#ffffff;
+
+    border-bottom:3px solid var(--primary);
+
+}
+
+/* Sidebar */
+
+body.pink .sidebar{
+
+    background:#ffffff;
+
+}
+
+/* Cards */
+
+body.pink .card{
+
+    background:white;
+
+    border:1px solid #fbcfe8;
+
+    box-shadow:
+
+        0 6px 20px rgba(236,72,153,.15);
+
+}
+
+body.pink .card-divider{
+
+    background:linear-gradient(
+
+        90deg,
+
+        #ec4899,
+
+        #f472b6
+
+    );
+
+    color:white;
+
+}
+
+/* Tabs */
+
+body.pink .tabs-title.is-active>a{
+
+    background:#ec4899;
+
+    color:white;
+
+}
+
+/* Botones */
+
+body.pink .button{
+
+    background:#ec4899;
+
+}
+
+body.pink .button:hover{
+
+    background:#db2777;
+
+}
+
+/* Inputs */
+
+body.pink input,
+
+body.pink select{
+
+    border-color:#f9a8d4;
+
+}
+
+body.pink input:focus,
+
+body.pink select:focus{
+
+    border-color:#ec4899;
+
+    box-shadow:
+
+        0 0 10px rgba(236,72,153,.30);
+
+}
+
+/* Tabla */
+
+body.pink thead{
+
+    background:#ec4899;
+
+}
+
+body.pink tbody tr:hover{
+
+    background:#fce7f3;
+
+}

@@ -1,0 +1,37 @@
+#formula-panel {
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.75rem;
+    min-height: 140px;
+}
+
+#formula-panel h4 {
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.formula-expression {
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    overflow-x: auto;
+    text-align: center;
+}
+
+.dark-mode #formula-panel {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+.dark-mode #formula-panel h4 {
+    color: #f8fafc;
+}
+
+.dark-mode .formula-expression {
+    background: #111827;
+    border-color: #334155;
+    color: #f8fafc;
+}

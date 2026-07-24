@@ -1,0 +1,146 @@
+:root{
+
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+
+    --success:#16a34a;
+    --danger:#dc2626;
+    --warning:#d97706;
+
+    --background:#f3f4f6;
+    --surface:#ffffff;
+
+    --text:#1f2937;
+    --text-light:#6b7280;
+
+    --border:#d1d5db;
+
+    --radius:12px;
+
+    --shadow:
+        0 4px 12px rgba(0,0,0,.08);
+
+    --transition:.25s;
+
+}
+
+body{
+
+    background:var(--background);
+
+    color:var(--text);
+
+    font-family:
+        "Segoe UI",
+        sans-serif;
+
+}
+
+.parameter-section{
+
+    padding: 0.5rem 0 0.25rem;
+
+}
+
+.parameter-title{
+
+    margin: 0 0 1rem;
+
+    font-size: 1.15rem;
+
+    font-weight: 700;
+
+    color: var(--primary);
+
+}
+
+.summary-stats p{
+
+    margin: 0.35rem 0;
+
+}
+
+.summary-stats strong{
+
+    color: var(--text);
+
+}
+
+.top-bar{
+
+    background:white;
+
+    box-shadow:var(--shadow);
+
+    padding:12px 20px;
+
+}
+
+.button{
+
+    border-radius:10px;
+
+    transition:all .25s;
+
+}
+
+.button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.card{
+
+    border:none;
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+
+}
+
+.card-divider{
+
+    background:var(--primary);
+
+    color:white;
+
+    font-weight:bold;
+
+}
+
+.callout{
+
+    border-radius:12px;
+
+}
+/*==================================================
+THEME SELECTOR
+==================================================*/
+
+.theme-selector{
+
+    width:170px;
+
+    margin:0;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+}
+
+.top-bar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}

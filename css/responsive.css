@@ -1,0 +1,57 @@
+@media (max-width:900px){
+
+.sidebar{
+
+    min-height:auto;
+
+    border-right:none;
+
+}
+
+.top-bar{
+
+    text-align:center;
+
+}
+
+.tabs-title{
+
+    width:100%;
+
+}
+
+.tabs-title>a{
+
+    text-align:center;
+
+}
+
+.card{
+
+    margin-bottom:20px;
+
+}
+
+}
+
+@media (max-width:600px){
+
+h4{
+
+    font-size:20px;
+
+}
+
+.button{
+
+    width:100%;
+
+}
+
+table{
+
+    font-size:13px;
+
+}
+
+}

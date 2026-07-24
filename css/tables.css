@@ -1,0 +1,110 @@
+/* Estilos para la tabla de resultados */
+
+.table-scroll {
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.75rem;
+    border: 1px solid #d6d6d6;
+    border-radius: 0.6rem;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+.table-results {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.95rem;
+    display: table !important;
+}
+
+.table-results thead th {
+    background: #e9edf5;
+    color: #111827;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid #cfd8e3;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.table-results tbody td {
+    padding: 0.7rem 0.95rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-results tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.table-results tbody tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.table-results tbody tr:hover {
+    background: #dbeafe;
+}
+
+.table-results .k-header,
+.table-results .k-cell {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    font-weight: 700;
+}
+
+.table-results tr.k-row td {
+    background: #fff1f2;
+}
+
+.table-results tr.k-row td.k-cell {
+    background: #fecaca !important;
+}
+
+/* Ajuste visual para modo oscuro */
+.dark-mode .table-scroll {
+    border-color: #4b5563;
+    background: #111827;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.dark-mode .table-results thead th {
+    background: #243244;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+.dark-mode .table-results tbody td {
+    border-color: #374151;
+    color: #f3f4f6;
+}
+
+.dark-mode .table-results tbody tr:nth-child(even) {
+    background: #0f172a;
+}
+
+.dark-mode .table-results tbody tr:nth-child(odd) {
+    background: #111827;
+}
+
+.dark-mode .table-results tbody tr:hover {
+    background: #1d4ed8;
+}
+
+.dark-mode .table-results .k-header,
+.dark-mode .table-results .k-cell {
+    background: #7f1d1d !important;
+    color: #fee2e2 !important;
+}
+
+.dark-mode .table-results tr.k-row td {
+    background: #3f0b18;
+}
+
+.dark-mode .table-results tr.k-row td.k-cell {
+    background: #991b1b !important;
+}

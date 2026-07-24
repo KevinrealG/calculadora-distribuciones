@@ -1,0 +1,29 @@
+.sidebar{
+
+    background:white;
+
+    min-height:100vh;
+
+    padding:20px;
+
+    border-right:1px solid var(--border);
+
+}
+
+.sidebar .card{
+
+    margin-bottom:20px;
+
+}
+
+#parameter-panel{
+
+    margin-top:15px;
+
+}
+
+#calculate-btn{
+
+    margin-top:15px;
+
+}

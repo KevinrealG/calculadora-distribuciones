@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Probability Calculator</title>
+
+<link rel="icon" href="assets/favicon.ico">
+
+<!-- Foundation -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css">
+
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<!-- CSS -->
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/cards.css">
+<link rel="stylesheet" href="css/forms.css">
+<link rel="stylesheet" href="css/tables.css">
+<link rel="stylesheet" href="css/formulas.css">
+<link rel="stylesheet" href="css/tabs.css">
+<link rel="stylesheet" href="css/themes/darkmode.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/themes/pinkmode.css">
+
+
+<!-- PyScript -->
+<link rel="stylesheet"
+href="https://pyscript.net/releases/2025.5.1/core.css">
+
+<script
+type="module"
+src="https://pyscript.net/releases/2025.5.1/core.js">
+</script>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+</head>
+
+<body>
+<!-- CSS del Loader -->
+<style>
+    #loading-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #007bff; /* Color de tu app */
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<!-- Contenedor del Loader -->
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <h3 style="margin-top: 20px; font-family: sans-serif; color: #333;">
+        Cargando distribuciones...
+    </h3>
+</div>
+
+<!-- ========================================================= -->
+<!-- HEADER -->
+<!-- ========================================================= -->
+
+<header class="top-bar">
+
+<div class="top-bar-left">
+
+<h4>
+
+📊 Probability Calculator
+
+</h4>
+
+</div>
+
+<div class="top-bar-right">
+
+<div class="top-bar-right">
+
+    <select
+        id="theme-selector"
+        class="theme-selector">
+
+        <option value="light">
+            ☀️ Light
+        </option>
+
+        <option value="dark">
+            🌙 Dark
+        </option>
+
+        <option value="pink">
+            🩷 Pink
+        </option>
+
+    </select>
+
+</div>
+
+</div>
+
+</header>
+
+<!-- ========================================================= -->
+<!-- CONTENIDO -->
+<!-- ========================================================= -->
+
+<div class="grid-x">
+
+<!-- ========================================================= -->
+<!-- SIDEBAR -->
+<!-- ========================================================= -->
+
+<aside
+class="cell
+small-12
+medium-4
+large-3
+sidebar">
+
+<div class="card">
+
+<div class="card-divider">
+
+Distribución
+
+</div>
+
+<div class="card-section">
+
+<select id="distribution-select">
+
+</select>
+
+</div>
+
+</div>
+
+<!-- parámetros -->
+
+<div
+id="parameter-panel">
+
+</div>
+
+<button
+id="calculate-btn"
+class="button expanded success">
+
+Calcular
+
+</button>
+
+</aside>
+
+<!-- ========================================================= -->
+<!-- PANEL DERECHO -->
+<!-- ========================================================= -->
+
+<main
+class="cell
+small-12
+medium-8
+large-9">
+
+<!-- Resultado -->
+
+<div id="result-panel"></div>
+
+<!-- Resumen -->
+
+<div id="summary-panel"></div>
+
+<!-- Tabs -->
+
+<ul
+class="tabs"
+data-tabs
+id="results-tabs">
+
+<li class="tabs-title is-active">
+
+<a href="#graph-tab">
+
+Gráfico
+
+</a>
+
+</li>
+
+<li class="tabs-title">
+
+<a href="#table-tab">
+
+Tabla
+
+</a>
+
+</li>
+
+<li class="tabs-title">
+
+<a href="#formula-tab">
+
+Fórmula
+
+</a>
+
+</li>
+
+<li class="tabs-title">
+
+<a href="#description-tab">
+
+Descripción
+
+</a>
+
+</li>
+
+<li class="tabs-title">
+
+<a href="#interpretation-tab">
+
+Interpretación
+
+</a>
+
+</li>
+
+</ul>
+
+<div
+class="tabs-content"
+data-tabs-content="results-tabs">
+
+<!-- ====================================================== -->
+
+<div
+class="tabs-panel is-active"
+id="graph-tab">
+
+<div id="chart-container"></div>
+
+</div>
+
+<!-- ====================================================== -->
+
+<div
+class="tabs-panel"
+id="table-tab">
+
+<div id="table-container"></div>
+
+</div>
+
+<!-- ====================================================== -->
+
+<div
+class="tabs-panel"
+id="formula-tab">
+
+<div id="formula-panel"></div>
+
+</div>
+
+<!-- ====================================================== -->
+
+<div
+class="tabs-panel"
+id="description-tab">
+
+<div id="description-panel"></div>
+
+</div>
+
+<!-- ====================================================== -->
+
+<div
+class="tabs-panel"
+id="interpretation-tab">
+
+<div id="interpretation-panel"></div>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<!-- ========================================================= -->
+<!-- JavaScript -->
+<!-- ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
+
+<script>
+
+$(document).foundation();
+
+</script>
+
+<script src="js/ui.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/tabs.js"></script>
+
+<!-- ========================================================= -->
+<!-- PyScript -->
+<!-- ========================================================= -->
+
+<py-config>
+
+packages = [
+
+"numpy",
+
+"scipy",
+
+"plotly"
+
+]
+
+[[fetch]]
+from = "./pyscript"
+files = [
+    "main.py",
+    "router.py",
+    "calculator_factory.py",
+    "config.py",
+    "ui/panels.py",
+    "ui/helpers.py",
+    "ui/charts.py",
+    "ui/tables.py",
+    "ui/validation.py",
+    "distributions/discrete/binomial.py",
+    "distributions/discrete/negative_binomial.py",
+    "statistics/probability.py",
+    "core/base_distribution.py",
+    "core/discrete_distribution.py",
+    "core/continuous_distribution.py",
+    # distributions - continuous
+    "distributions/continuous/normal.py",
+    "distributions/continuous/exponential.py",
+    "distributions/continuous/gamma.py",
+    "distributions/continuous/beta.py",
+    "distributions/continuous/weibull.py",
+    "distributions/continuous/uniform.py",
+    "distributions/continuous/lognormal.py",
+    "distributions/continuous/chi_square.py",
+    "distributions/continuous/t_student.py",
+    "distributions/continuous/fisher.py",
+    # statistics
+    "statistics/probability.py",
+    "statistics/cumulative.py",
+    "statistics/intervals.py",
+    "statistics/descriptive.py",
+    "statistics/moments.py",
+    "statistics/validators.py",
+    # distributions - discrete
+    "distributions/discrete/binomial.py",
+    "distributions/discrete/poisson.py",
+    "distributions/discrete/negative_binomial.py",
+    "distributions/discrete/hypergeometric.py",
+    "distributions/discrete/geometric.py",
+    "distributions/discrete/uniforme_discreta.py",
+
+
+ 
+
+
+]
+
+</py-config>
+
+<py-script
+
+src="./pyscript/main.py">
+
+
+</py-script>
+
+</body>
+
+
+</html>

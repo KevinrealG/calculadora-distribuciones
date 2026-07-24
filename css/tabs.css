@@ -1,0 +1,33 @@
+.tabs{
+
+    border:none;
+
+    margin-top:20px;
+
+}
+
+.tabs-title>a{
+
+    border-radius:10px 10px 0 0;
+
+    color:var(--text);
+
+}
+
+.tabs-title.is-active>a{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+.tabs-content{
+
+    border-radius:0 10px 10px 10px;
+
+    background:white;
+
+    box-shadow:var(--shadow);
+
+}

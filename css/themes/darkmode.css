@@ -1,0 +1,62 @@
+body.dark{
+
+    --background:#111827;
+
+    --surface:#1f2937;
+
+    --text:#f9fafb;
+
+    --text-light:#d1d5db;
+
+    --border:#374151;
+
+}
+
+body.dark .top-bar{
+
+    background:#1f2937;
+
+}
+
+body.dark .sidebar{
+
+    background:#1f2937;
+
+}
+
+body.dark .card{
+
+    background:#1f2937;
+
+    color:white;
+
+}
+
+body.dark .tabs-content{
+
+    background:#1f2937;
+
+}
+
+body.dark table{
+
+    color:white;
+
+}
+
+body.dark tbody tr:nth-child(even){
+
+    background:#374151;
+
+}
+
+body.dark input,
+body.dark select{
+
+    background:#374151;
+
+    color:white;
+
+    border-color:#4b5563;
+
+}
