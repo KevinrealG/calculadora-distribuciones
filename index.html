@@ -455,6 +455,75 @@
             <div id="view-anova" class="tool-view">
                 <div class="card"><div class="card-section"><h3>Análisis de Varianza (ANOVA)</h3><p>En construcción...</p></div></div>
             </div>
+            <!-- VISTA: ÁLGEBRA LINEAL -->
+<div id="view-algebra" class="tool-view">
+    <div class="grid-x grid-margin-x">
+        <div class="cell small-12">
+            
+            <!-- 1. Barra superior de herramientas -->
+            <div class="al-card">
+                <div class="al-toolbar-tabs">
+                    <button class="al-tab-btn">Basic</button>
+                    <button class="al-tab-btn">Álgebra</button>
+                    <button class="al-tab-btn active" onclick="toggleMatrixPopup()">Matrices</button>
+                    <button class="al-tab-btn">Trigonometría</button>
+                    <button class="al-tab-btn">Letras Griegas</button>
+                </div>
+                
+                <div class="matrix-tools">
+                    <div class="matrix-selector-container">
+                        <button class="button secondary small">Insertar Matriz</button>
+                        <div class="matrix-grid-popup" id="matrixPopup">
+                            <div class="matrix-info">
+                                <span id="matrixSizeTxt">Tamaño: 0x0</span>
+                                <a href="#" style="color: red; text-decoration: none;" onclick="toggleMatrixPopup(); return false;">cerrar</a>
+                            </div>
+                            <div class="matrix-grid" id="matrixGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Área principal de trabajo y chips -->
+            <div class="al-card">
+                <div class="al-chips-container">
+                    <button class="al-chip">Eigenvalores</button>
+                    <button class="al-chip">Eigenvectores</button>
+                    <button class="al-chip">Diagonalización</button>
+                    <button class="al-chip">Gauss-Jordan</button>
+                    <button class="al-chip">Matriz inversa</button>
+                    <button class="al-chip">Determinante</button>
+                    <button class="al-chip">SVD</button>
+                    <button class="al-chip" style="background: white; border: 1px dashed #ccc;">Ver todo ▾</button>
+                </div>
+
+                <div class="al-input-group">
+                    <input type="text" class="al-main-input" placeholder="Ingresa una expresión matricial o problema...">
+                    <button class="al-icon-btn" title="Cámara">📷</button>
+                    <button class="al-icon-btn" title="Teclado Matemático">⌨️</button>
+                    <button class="al-solve-btn">Resolver</button>
+                </div>
+            </div>
+
+            <!-- 3. Panel de Resultados -->
+            <div class="al-card">
+                <div class="al-results-header">
+                    <h4>Resultados</h4>
+                    <div class="al-action-icons">
+                        <span title="Compartir">🔗</span>
+                        <span title="Imprimir">🖨️</span>
+                        <span title="Exportar PDF">📄</span>
+                        <span title="Copiar">📋</span>
+                    </div>
+                </div>
+                <div id="al-results-body">
+                    <p style="color: #666; font-style: italic;">El procedimiento paso a paso aparecerá aquí...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
         </div>
     </div>

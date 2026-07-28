@@ -78,3 +78,56 @@ function mostrarError(mensaje) {
         contenedor.innerHTML = '';
     }, 5000);
 }
+
+/* =========================================
+   ÁLGEBRA LINEAL - SELECTOR DE MATRICES
+   ========================================= */
+function toggleMatrixPopup() {
+    const popup = document.getElementById('matrixPopup');
+    popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    if(popup.style.display === 'block' && document.getElementById('matrixGrid').children.length === 0) {
+        initMatrixGrid();
+    }
+}
+
+function initMatrixGrid() {
+    const grid = document.getElementById('matrixGrid');
+    const sizeTxt = document.getElementById('matrixSizeTxt');
+    const cols = 10;
+    const rows = 10;
+
+    for (let r = 1; r <= rows; r++) {
+        for (let c = 1; c <= cols; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'matrix-cell';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            
+            cell.addEventListener('mouseover', function() {
+                highlightCells(r, c);
+                sizeTxt.textContent = `Tamaño: ${r}x${c}`;
+            });
+            
+            cell.addEventListener('click', function() {
+                console.log(`Matriz seleccionada: ${r}x${c}`);
+                // Futura integración con Python/PyScript
+                toggleMatrixPopup(); 
+            });
+
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function highlightCells(maxRow, maxCol) {
+    const cells = document.querySelectorAll('.matrix-cell');
+    cells.forEach(cell => {
+        const r = parseInt(cell.dataset.row);
+        const c = parseInt(cell.dataset.col);
+        if (r <= maxRow && c <= maxCol) {
+            cell.classList.add('hovered');
+        } else {
+            cell.classList.remove('hovered');
+        }
+    });
+}
