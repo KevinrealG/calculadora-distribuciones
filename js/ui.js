@@ -17,3 +17,64 @@ document.addEventListener("DOMContentLoaded", function () {
         characterData: true
     });
 });
+// Manejo del selector desplegable
+document.getElementById('desc-view-selector').addEventListener('change', function(e) {
+    const views = document.querySelectorAll('.desc-sub-view');
+    views.forEach(view => view.style.display = 'none');
+    
+    const selectedView = document.getElementById(e.target.value);
+    if(selectedView) {
+        selectedView.style.display = 'block';
+        // Refrescar tabs de Foundation en la nueva vista
+        $(document).foundation(); 
+    }
+});
+
+// Lógica universal para agregar filas
+document.querySelectorAll('.btn-add-fila').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const tbody = document.getElementById(targetId);
+        
+        if(tbody && tbody.children.length > 0) {
+            // Clona la primera fila para mantener los inputs correctos
+            const nuevaFila = tbody.children[0].cloneNode(true);
+            // Limpia los valores
+            nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+            tbody.appendChild(nuevaFila);
+        }
+    });
+});
+
+// Lógica universal para eliminar filas (Delegación)
+document.addEventListener('click', function(e) {
+    if(e.target.classList.contains('btn-del-fila')) {
+        const tbody = e.target.closest('tbody');
+        if(tbody && tbody.children.length > 1) { // Evita borrar la última fila
+            e.target.closest('tr').remove();
+        } else {
+            mostrarError("No puedes eliminar la última fila.");
+        }
+    }
+});
+
+// Función para mostrar errores visuales
+function mostrarError(mensaje) {
+    const contenedor = document.getElementById('desc-error-container');
+    contenedor.innerHTML = `
+        <div class="callout alert" data-closable>
+            <h5>⚠️ Error</h5>
+            <p>${mensaje}</p>
+            <button class="close-button" aria-label="Dismiss alert" type="button" data-close>
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    // Inicializar el botón de cierre de Foundation
+    $(document).foundation();
+    
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+        contenedor.innerHTML = '';
+    }, 5000);
+}
