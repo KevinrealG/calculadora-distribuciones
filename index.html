@@ -456,72 +456,101 @@
                 <div class="card"><div class="card-section"><h3>Análisis de Varianza (ANOVA)</h3><p>En construcción...</p></div></div>
             </div>
             <!-- VISTA: ÁLGEBRA LINEAL -->
+<!-- VISTA: ÁLGEBRA LINEAL -->
 <div id="view-algebra" class="tool-view">
-    <div class="grid-x grid-margin-x">
-        <div class="cell small-12">
-            
-            <!-- 1. Barra superior de herramientas -->
-            <div class="al-card">
-                <div class="al-toolbar-tabs">
-                    <button class="al-tab-btn">Basic</button>
-                    <button class="al-tab-btn">Álgebra</button>
-                    <button class="al-tab-btn active" onclick="toggleMatrixPopup()">Matrices</button>
-                    <button class="al-tab-btn">Trigonometría</button>
-                    <button class="al-tab-btn">Letras Griegas</button>
-                </div>
-                
-                <div class="matrix-tools">
-                    <div class="matrix-selector-container">
-                        <button class="button secondary small">Insertar Matriz</button>
-                        <div class="matrix-grid-popup" id="matrixPopup">
-                            <div class="matrix-info">
-                                <span id="matrixSizeTxt">Tamaño: 0x0</span>
-                                <a href="#" style="color: red; text-decoration: none;" onclick="toggleMatrixPopup(); return false;">cerrar</a>
-                            </div>
-                            <div class="matrix-grid" id="matrixGrid"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Área principal de trabajo y chips -->
-            <div class="al-card">
-                <div class="al-chips-container">
-                    <button class="al-chip">Eigenvalores</button>
-                    <button class="al-chip">Eigenvectores</button>
-                    <button class="al-chip">Diagonalización</button>
-                    <button class="al-chip">Gauss-Jordan</button>
-                    <button class="al-chip">Matriz inversa</button>
-                    <button class="al-chip">Determinante</button>
-                    <button class="al-chip">SVD</button>
-                    <button class="al-chip" style="background: white; border: 1px dashed #ccc;">Ver todo ▾</button>
-                </div>
-
-                <div class="al-input-group">
-                    <input type="text" class="al-main-input" placeholder="Ingresa una expresión matricial o problema...">
-                    <button class="al-icon-btn" title="Cámara">📷</button>
-                    <button class="al-icon-btn" title="Teclado Matemático">⌨️</button>
-                    <button class="al-solve-btn">Resolver</button>
-                </div>
-            </div>
-
-            <!-- 3. Panel de Resultados -->
-            <div class="al-card">
-                <div class="al-results-header">
-                    <h4>Resultados</h4>
-                    <div class="al-action-icons">
-                        <span title="Compartir">🔗</span>
-                        <span title="Imprimir">🖨️</span>
-                        <span title="Exportar PDF">📄</span>
-                        <span title="Copiar">📋</span>
-                    </div>
-                </div>
-                <div id="al-results-body">
-                    <p style="color: #666; font-style: italic;">El procedimiento paso a paso aparecerá aquí...</p>
-                </div>
-            </div>
-
+    
+    <!-- Selector Desplegable de Herramientas -->
+    <div class="grid-x grid-margin-x" style="margin-bottom: 20px;">
+        <div class="cell small-12 medium-6 large-4">
+            <label for="al-view-selector" style="font-weight: bold; color: white;">Selecciona el tipo de análisis:</label>
+            <select id="al-view-selector" style="border-radius: 5px;">
+                <option value="al-sub-matrices">📐 Matrices</option>
+                <option value="al-sub-vectores">📏 Vectores</option>
+                <option value="al-sub-sistemas">🔢 Sistemas</option>
+                <option value="al-sub-transformaciones">🔄 Transformaciones</option>
+                <option value="al-sub-especiales">🎯 Matrices Especiales</option>
+                <option value="al-sub-propiedades">✅ Propiedades</option>
+                <option value="al-sub-aleatoria">🎲 Aleatoria</option>
+                <option value="al-sub-guia">📖 Guía</option>
+            </select>
         </div>
+    </div>
+
+    <!-- Contenedor de Sub-vistas -->
+    <div id="al-sub-views-container">
+        
+        <!-- 1. MATRICES (Tu editor actual) -->
+       <!-- 1. MATRICES -->
+<div id="al-sub-matrices" class="al-sub-view" style="display: block;">
+    
+    <!-- Menú de Tamaños Predeterminados -->
+    <div class="al-size-selector card" style="padding: 10px; margin-bottom: 15px;">
+        <div class="grid-x grid-padding-x align-center">
+            <button class="button tiny hollow" onclick="insertMatrix(2,2)">(2×2)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(2,3)">(2×3)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(3,3)">(3×3)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(3,2)">(3×2)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(4,4)">(4×4)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(3,4)">(3×4)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(2,4)">(2×4)</button>
+            <button class="button tiny hollow" onclick="insertMatrix(5,5)">(5×5)</button>
+            <!-- Botón para tamaño personalizado -->
+            <!-- Contenedor ancla para evitar que el popup parpadee o salte -->
+            <div class="al-custom-size-wrapper" style="position: relative; display: inline-block;">
+                <!-- Botón para tamaño personalizado -->
+                <button class="button tiny secondary" onclick="toggleMatrixPopup(event)">⚙️ Personalizado</button>
+                
+                <!-- Popup de la cuadrícula -->
+                <div id="matrix-popup" class="al-matrix-popup" style="display: none;">
+                    <div class="al-popup-header">
+                        <span id="matrixSizeTxt">Tamaño de la matriz: 1x1</span>
+                        <button class="al-close-btn" onclick="toggleMatrixPopup(event)">cerrar</button>
+                    </div>
+                    <div id="matrixGrid" class="al-matrix-grid"></div>
+                </div>
+            </div>
+
+    <!-- Editor Visual -->
+    <div class="al-editor-container">
+        <div class="al-visual-editor" id="al-visual-editor" tabindex="0">
+            <div id="al-placeholder" style="color: #999; font-style: italic;">Selecciona un tamaño arriba para comenzar...</div>
+        </div>
+        
+        <div class="al-editor-actions">
+            <button class="button tiny secondary" onclick="addMatrixOperator('+')">➕</button>
+            <button class="button tiny secondary" onclick="addMatrixOperator('-')">➖</button>
+            <button class="button tiny secondary" onclick="addMatrixOperator('*')">✖️</button>
+            <button class="button tiny secondary" onclick="addMatrixOperator('=')">🟰</button>
+            <div style="flex-grow: 1;"></div>
+            <button class="al-icon-btn" title="Cámara">📷</button>
+            <button class="al-icon-btn" title="Teclado Matemático">⌨️</button>
+            <button id="calc-al-btn" class="al-solve-btn">Resolver</button>
+        </div>
+    </div>
+    
+    <div class="al-card" style="margin-top: 20px;">
+        <div class="al-results-header"><h4>Resultados</h4></div>
+        <div id="al-results-body"><p style="color: #666; font-style: italic;">El procedimiento aparecerá aquí...</p></div>
+    </div>
+</div>
+
+        <!-- 2. VECTORES (Placeholder) -->
+        <div id="al-sub-vectores" class="al-sub-view" style="display: none;">
+            <div class="al-card"><p>Módulo de Vectores en construcción...</p></div>
+        </div>
+
+        <!-- 3. SISTEMAS (Placeholder) -->
+        <div id="al-sub-sistemas" class="al-sub-view" style="display: none;">
+            <div class="al-card"><p>Módulo de Sistemas de Ecuaciones en construcción...</p></div>
+        </div>
+        
+        <!-- Agrega las demás sub-vistas (transformaciones, especiales, etc.) siguiendo este mismo patrón -->
+        <div id="al-sub-transformaciones" class="al-sub-view" style="display: none;">...</div>
+        <div id="al-sub-especiales" class="al-sub-view" style="display: none;">...</div>
+        <div id="al-sub-propiedades" class="al-sub-view" style="display: none;">...</div>
+        <div id="al-sub-aleatoria" class="al-sub-view" style="display: none;">...</div>
+        <div id="al-sub-guia" class="al-sub-view" style="display: none;">...</div>
+
     </div>
 </div>
 

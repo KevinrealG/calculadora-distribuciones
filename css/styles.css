@@ -167,3 +167,96 @@ THEME SELECTOR
 .al-solve-btn { background: #ff6b6b; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 .al-results-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
 .al-action-icons span { margin-left: 15px; cursor: pointer; color: #666; }
+/* Editor Visual de Matrices */
+.al-editor-container { border: 2px solid #e4e6eb; border-radius: 12px; padding: 15px; background: #fafafa; transition: border-color 0.2s; }
+.al-editor-container:focus-within { border-color: #ff6b6b; }
+.al-visual-editor { display: flex; align-items: center; gap: 15px; min-height: 120px; overflow-x: auto; padding: 10px; background: #ffffff; border-radius: 8px; margin-bottom: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+
+/* Estructura de la Matriz */
+.matrix-wrapper { position: relative; display: flex; align-items: center; gap: 5px; }
+.matrix-brackets { display: grid; gap: 5px; padding: 5px 10px; position: relative; }
+/* Dibujo de corchetes */
+.matrix-brackets::before, .matrix-brackets::after { content: ''; position: absolute; top: 0; bottom: 0; width: 8px; border: 2px solid #333; }
+.matrix-brackets::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+.matrix-brackets::after { right: 0; border-left: none; border-radius: 0 4px 4px 0; }
+
+/* Celdas Interactivas */
+.matrix-cell-input { width: 50px; height: 50px; text-align: center; border: 1px solid #ddd; border-radius: 6px; font-size: 1.1rem; font-family: 'KaTeX_Math', 'STIX Two Math', serif; transition: all 0.2s; background: #fff; }
+.matrix-cell-input:focus { border-color: #ff6b6b; outline: none; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); transform: scale(1.05); z-index: 10; }
+
+/* Controles de la matriz (Hover) */
+.matrix-controls { position: absolute; top: -30px; right: 0; display: none; gap: 5px; }
+.matrix-wrapper:hover .matrix-controls { display: flex; }
+.matrix-btn-action { background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.8rem; padding: 2px 6px; color: #555; }
+.matrix-btn-action:hover { background: #eee; }
+
+/* Operadores visuales */
+.al-visual-operator { font-size: 1.8rem; font-weight: bold; color: #555; cursor: pointer; padding: 0 10px; }
+
+/* Barra de acciones */
+.al-editor-actions { display: flex; align-items: center; gap: 10px; }
+.al-size-selector .button {
+    margin: 4px;
+    font-family: 'KaTeX_Math', 'STIX Two Math', serif;
+    color: #444;
+    border-color: #ddd;
+}
+.al-size-selector .button:hover { background-color: #f0f0f0; }
+/* Estilos del Popup de Tamaño Personalizado */
+/* Estilos del Popup de Tamaño Personalizado */
+.al-matrix-popup {
+    position: absolute;
+    top: 100%; /* Lo ancla justo debajo del botón */
+    left: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Sombra ligeramente más oscura */
+    padding: 10px;
+    z-index: 1000; /* Asegura que esté por encima de cualquier otro panel */
+    width: max-content;
+    margin-top: 8px; /* Separación limpia del botón */
+}
+
+.al-popup-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.al-close-btn {
+    background: none;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.al-close-btn:hover {
+    text-decoration: underline;
+}
+
+/* Cuadrícula de 10x10 */
+.al-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 20px);
+    grid-template-rows: repeat(10, 20px);
+    gap: 2px;
+}
+
+.matrix-cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #f0f0f0;
+    background: #fff;
+    cursor: pointer;
+}
+
+/* Celda seleccionada (Gris) */
+.matrix-cell.active {
+    background: #999;
+    border-color: #999;
+}
