@@ -516,16 +516,20 @@
             <div id="al-placeholder" style="color: #999; font-style: italic;">Selecciona un tamaño arriba para comenzar...</div>
         </div>
         
-        <div class="al-editor-actions">
-            <button class="button tiny secondary" onclick="addMatrixOperator('+')">➕</button>
-            <button class="button tiny secondary" onclick="addMatrixOperator('-')">➖</button>
-            <button class="button tiny secondary" onclick="addMatrixOperator('*')">✖️</button>
-            <button class="button tiny secondary" onclick="addMatrixOperator('=')">🟰</button>
-            <div style="flex-grow: 1;"></div>
-            <button class="al-icon-btn" title="Cámara">📷</button>
-            <button class="al-icon-btn" title="Teclado Matemático">⌨️</button>
-            <button id="calc-al-btn" class="al-solve-btn">Resolver</button>
-        </div>
+        <!-- Reemplaza tu contenedor de acciones con este -->
+<div class="al-editor-actions">
+    <!-- Nuevo botón de escalar -->
+    <button class="button tiny secondary" onclick="addScalar()">🔢 Escalar</button>
+    
+    <button class="button tiny secondary" onclick="addMatrixOperator('+')">➕</button>
+    <button class="button tiny secondary" onclick="addMatrixOperator('-')">➖</button>
+    <button class="button tiny secondary" onclick="addMatrixOperator('*')">✖️</button>
+    <button class="button tiny secondary" onclick="addMatrixOperator('=')">🟰</button>
+    <div style="flex-grow: 1;"></div>
+    <button class="al-icon-btn" title="Cámara">📷</button>
+    <button class="al-icon-btn" title="Teclado Matemático">⌨️</button>
+    <button id="calc-al-btn" class="al-solve-btn">Resolver</button>
+</div>
     </div>
     
     <div class="al-card" style="margin-top: 20px;">

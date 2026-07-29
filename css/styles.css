@@ -260,3 +260,45 @@ THEME SELECTOR
     background: #999;
     border-color: #999;
 }
+/* =========================================
+   ÁLGEBRA LINEAL - ESCALARES Y SELECCIÓN
+   ========================================= */
+
+/* Estado de elemento seleccionado */
+.matrix-wrapper.selected, .scalar-wrapper.selected {
+    outline: 3px solid #ff6b6b;
+    border-radius: 8px;
+    background-color: rgba(255, 107, 107, 0.05);
+}
+
+/* Estructura del escalar */
+.scalar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.scalar-input {
+    width: 60px;
+    height: 50px;
+    text-align: center;
+    border: 2px dashed #999;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    font-family: 'KaTeX_Math', 'STIX Two Math', serif;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.scalar-input:focus {
+    border-color: #ff6b6b;
+    border-style: solid;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.2);
+}
+
+.scalar-wrapper:hover .matrix-controls {
+    display: flex;
+}

@@ -211,6 +211,13 @@ function insertMatrix(rows, cols) {
 
     wrapper.appendChild(controls);
     wrapper.appendChild(brackets);
+    
+    // NUEVO: Lógica de selección al hacer clic en la matriz
+    wrapper.addEventListener('click', (e) => {
+        document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
+        wrapper.classList.add('selected');
+    });
+
     editor.appendChild(wrapper);
     
     // Auto-focus en la primera celda
@@ -265,5 +272,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetView.style.display = 'block';
             }
         });
+    }
+});
+
+// Nueva función para agregar escalares
+function addScalar() {
+    const editor = document.getElementById('al-visual-editor');
+    const placeholder = document.getElementById('al-placeholder');
+    if (placeholder) placeholder.remove();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'scalar-wrapper';
+    
+    wrapper.innerHTML = `
+        <div class="matrix-controls" style="top: -25px;">
+            <button class="matrix-btn-action" onclick="this.closest('.scalar-wrapper').remove()" title="Eliminar escalar">🗑️</button>
+        </div>
+        <input type="number" class="scalar-input" placeholder="n">
+    `;
+
+    // Selección al hacer clic
+    wrapper.addEventListener('click', (e) => {
+        document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
+        wrapper.classList.add('selected');
+    });
+
+    editor.appendChild(wrapper);
+    wrapper.querySelector('input').focus();
+}
+// NUEVO: Eventos globales para eliminar con teclado y quitar selección
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        const selected = document.querySelector('.matrix-wrapper.selected, .scalar-wrapper.selected');
+        
+        // Solo elimina si hay algo seleccionado y el usuario NO está escribiendo dentro de un input
+        if (selected && document.activeElement.tagName !== 'INPUT') {
+            selected.remove();
+            
+            // Restaura el placeholder si el editor queda vacío
+            const editor = document.getElementById('al-visual-editor');
+            if (editor && editor.children.length === 0) {
+                editor.innerHTML = '<div id="al-placeholder" style="color: #999; font-style: italic;">Selecciona un tamaño arriba para comenzar...</div>';
+            }
+        }
+    }
+});
+
+// NUEVO: Quitar selección al hacer clic fuera del editor
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.matrix-wrapper') && !e.target.closest('.scalar-wrapper') && !e.target.closest('.al-editor-actions')) {
+        document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
     }
 });
