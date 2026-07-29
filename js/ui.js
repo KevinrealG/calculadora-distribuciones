@@ -324,3 +324,50 @@ document.addEventListener('click', (e) => {
         document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
     }
 });
+
+/* =========================================
+   ÁLGEBRA LINEAL - GRAFICADORA DE SISTEMAS
+   ========================================= */
+
+function cambiarDimensionSistema() {
+    const dim = document.getElementById('sys-dimension').value;
+    const container = document.getElementById('sys-inputs-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (dim === "2") {
+        container.innerHTML = `
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Ecuación 1: $A_1x + B_1y = C_1$</p>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 8px;">
+                <input type="number" id="s2-a1" value="1" style="width: 50px; text-align: center;" placeholder="A1"> x + 
+                <input type="number" id="s2-b1" value="1" style="width: 50px; text-align: center;" placeholder="B1"> y = 
+                <input type="number" id="s2-c1" value="5" style="width: 60px; text-align: center;" placeholder="C1">
+            </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px; margin-top: 15px;">Ecuación 2: $A_2x + B_2y = C_2$</p>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 8px;">
+                <input type="number" id="s2-a2" value="2" style="width: 50px; text-align: center;" placeholder="A2"> x + 
+                <input type="number" id="s2-b2" value="-1" style="width: 50px; text-align: center;" placeholder="B2"> y = 
+                <input type="number" id="s2-c2" value="4" style="width: 60px; text-align: center;" placeholder="C2">
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Sistema 3x3 ($Ax + By + Cz = D$)</p>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                <input type="number" id="s3-a1" value="1" style="width: 40px;" placeholder="A1">x+<input type="number" id="s3-b1" value="1" style="width: 40px;" placeholder="B1">y+<input type="number" id="s3-c1" value="1" style="width: 40px;" placeholder="C1">z=<input type="number" id="s3-d1" value="6" style="width: 50px;" placeholder="D1">
+            </div>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                <input type="number" id="s3-a2" value="2" style="width: 40px;" placeholder="A2">x+<input type="number" id="s3-b2" value="-1" style="width: 40px;" placeholder="B2">y+<input type="number" id="s3-c2" value="1" style="width: 40px;" placeholder="C2">z=<input type="number" id="s3-d2" value="3" style="width: 50px;" placeholder="D2">
+            </div>
+            <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                <input type="number" id="s3-a3" value="1" style="width: 40px;" placeholder="A3">x+<input type="number" id="s3-b3" value="2" style="width: 40px;" placeholder="B3">y+<input type="number" id="s3-c3" value="-1" style="width: 40px;" placeholder="C3">z=<input type="number" id="s3-d3" value="2" style="width: 50px;" placeholder="D3">
+            </div>
+        `;
+    }
+}
+
+// Inicializar los inputs 2x2 por defecto al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    cambiarDimensionSistema();
+});

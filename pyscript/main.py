@@ -68,6 +68,7 @@ class Application:
         
         # NUEVO: Proxy para Álgebra Lineal
         self.calc_al_proxy = create_proxy(self.calcular_algebra)
+        self.calc_sys_proxy = create_proxy(self.calcular_sistema)
 
     # --------------------------------------------------
     # Inicio
@@ -135,7 +136,8 @@ class Application:
             "calc-cualf-btn": self.calc_cualf_proxy,
             "calc-cont-btn": self.calc_cont_proxy,
             "calc-biv-btn": self.calc_biv_proxy,
-            "calc-al-btn": self.calc_al_proxy  # NUEVO: Evento Álgebra Lineal
+            "calc-al-btn": self.calc_al_proxy,  # NUEVO: Evento Álgebra Lineal
+            "calc-sys-btn": self.calc_sys_proxy,
         }
 
         for btn_id, proxy in botones.items():
@@ -245,6 +247,191 @@ class Application:
         else:
             resultados.innerHTML = "<p style='color:#666; font-style:italic;'>El procedimiento aparecerá aquí... Asegúrate de ingresar una matriz.</p>"
 
+    def calcular_sistema(self, event=None):
+        print("Calculando sistema de ecuaciones...")
+        error_box = document.getElementById("sys-error")
+        error_box.innerHTML = ""
+        
+        try:
+            # 1. Obtener dimensión y recolectar los valores de los inputs
+            dim = int(document.getElementById("sys-dimension").value)
+            contenedor = document.getElementById("sys-inputs-container")
+            inputs = contenedor.querySelectorAll("input")
+            
+            # Validar que estén todos los campos (matriz cuadrada + vector de resultados)
+            if inputs.length != (dim * (dim + 1)):
+                error_box.innerHTML = "⚠️ Faltan campos en el formulario."
+                return
+                
+            # 2. Construir la matriz de coeficientes (A) y el vector de constantes (b)
+            A, b = [], []
+            idx = 0
+            for i in range(dim):
+                fila = []
+                for j in range(dim):
+                    val = float(inputs[idx].value) if inputs[idx].value else 0.0
+                    fila.append(val)
+                    idx += 1
+                b.append(float(inputs[idx].value) if inputs[idx].value else 0.0)
+                idx += 1
+                A.append(fila)
+                
+            A = np.array(A)
+            b = np.array(b)
+            resultados = document.getElementById("sys-result-body")
+            
+            # 3. Solución Analítica usando NumPy
+            solucion = None
+            try:
+                solucion = np.linalg.solve(A, b)
+                variables = ['x', 'y', 'z']
+                html_res = "<ul style='list-style-type: none; padding-left: 0;'>"
+                for i in range(dim):
+                    html_res += f"<li><strong>{variables[i]}</strong> = {solucion[i]:.4f}</li>"
+                html_res += "</ul>"
+                resultados.innerHTML = html_res
+            except np.linalg.LinAlgError:
+                # Ocurre si el determinante es 0 (líneas paralelas o coincidentes)
+                resultados.innerHTML = "<p style='color:red;'>El sistema no tiene solución única.</p>"
+                
+            # 4. Solución Gráfica (Enfocado en 2x2)
+            if dim == 2:
+                self._graficar_2x2(A, b, solucion)
+            elif dim == 3:
+                #document.getElementById("sys-graph-container").innerHTML = "<p style='padding: 20px;'>La graficación 3D está en construcción...</p>"
+                self._graficar_3x3(A, b, solucion)
+                
+        except ValueError:
+            error_box.innerHTML = "⚠️ Asegúrate de ingresar únicamente números válidos."
+        except Exception as e:
+            error_box.innerHTML = f"⚠️ Error inesperado: {str(e)}"
+
+    def _graficar_2x2(self, A, b, solucion):
+        """Genera el gráfico interactivo para el sistema 2x2"""
+        import json
+        
+        config = {"responsive": True}
+        layout = {
+            "title": "Representación del Sistema 2x2",
+            "xaxis": {"title": "Eje X", "zeroline": True},
+            "yaxis": {"title": "Eje Y", "zeroline": True},
+            "margin": {"t": 40, "b": 40, "l": 50, "r": 20},
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)"
+        }
+        
+        trazos = []
+        # Definimos un rango para el eje X
+        x_vals = np.linspace(-15, 15, 100).tolist()
+        colores = ["#2563eb", "#e83e8c"]
+        
+        # Calcular y = (b - Ax) / B para ambas rectas
+        for i in range(2):
+            if A[i][1] != 0: # Si la recta no es totalmente vertical
+                y_vals = [(b[i] - A[i][0] * x) / A[i][1] for x in x_vals]
+                trazos.append({
+                    "x": x_vals, "y": y_vals, "type": "scatter", 
+                    "mode": "lines", "name": f"Ec {i+1}",
+                    "line": {"color": colores[i]}
+                })
+            else: # Manejo de recta vertical (x = constante)
+                if A[i][0] != 0:
+                    x_vert = b[i] / A[i][0]
+                    trazos.append({
+                        "x": [x_vert, x_vert], "y": [-15, 15], "type": "scatter", 
+                        "mode": "lines", "name": f"Ec {i+1} (Vertical)",
+                        "line": {"color": colores[i]}
+                    })
+                
+        # Marcar visualmente el punto de intersección exacto
+        if solucion is not None:
+            trazos.append({
+                "x": [float(solucion[0])], "y": [float(solucion[1])],
+                "type": "scatter", "mode": "markers", "name": "Solución",
+                "marker": {"color": "#4CAF50", "size": 10, "symbol": "star"}
+            })
+            
+        # Enviar la información al div de HTML
+        window.Plotly.newPlot(
+            "sys-graph-container", 
+            window.JSON.parse(json.dumps(trazos)), 
+            window.JSON.parse(json.dumps(layout)), 
+            window.JSON.parse(json.dumps(config))
+        )
+
+    def _graficar_3x3(self, A, b, solucion):
+        """
+        Genera el gráfico interactivo 3D para un sistema 3x3.
+        Dibuja 3 planos y marca el punto de solución.
+        """
+        
+        
+        # Configuración básica de Plotly para 3D
+        config = {"responsive": True}
+        layout = {
+            "title": "Representación del Sistema 3x3 (Planos)",
+            "margin": {"t": 40, "b": 0, "l": 0, "r": 0}, # Márgenes ajustados para aprovechar el espacio
+            "scene": {
+                "xaxis": {"title": "Eje X"},
+                "yaxis": {"title": "Eje Y"},
+                "zaxis": {"title": "Eje Z"}
+            },
+            "paper_bgcolor": "rgba(0,0,0,0)"
+        }
+        
+        trazos = []
+        
+        # 1. Crear una cuadrícula 2D para los ejes X e Y
+        x_vals = np.linspace(-10, 10, 20)
+        y_vals = np.linspace(-10, 10, 20)
+        X, Y = np.meshgrid(x_vals, y_vals)
+        
+        # Paletas de colores para diferenciar los tres planos
+        colores = ["Blues", "Reds", "Greens"]
+        
+        # 2. Iterar sobre las 3 ecuaciones para construir los planos
+        for i in range(3):
+            coef_z = A[i][2]
+            
+            # Ajuste de seguridad: Evitar división por cero si el plano es paralelo al eje Z
+            if abs(coef_z) < 1e-6:
+                coef_z = 1e-6  
+                
+            # Ecuación: A[i][0]*x + A[i][1]*y + A[i][2]*z = b[i]
+            # Despejamos Z
+            Z = (b[i] - A[i][0]*X - A[i][1]*Y) / coef_z
+            
+            # Añadir la superficie del plano a la lista de trazos
+            trazos.append({
+                "type": "surface",
+                "x": x_vals.tolist(),
+                "y": y_vals.tolist(),
+                "z": Z.tolist(),
+                "colorscale": colores[i],
+                "opacity": 0.6, # Transparencia para poder ver las intersecciones
+                "name": f"Plano {i+1}",
+                "showscale": False # Ocultar la barra de colores lateral para ahorrar espacio
+            })
+            
+        # 3. Graficar el punto de intersección exacto (si el sistema tiene solución)
+        if solucion is not None:
+            trazos.append({
+                "type": "scatter3d",
+                "mode": "markers",
+                "x": [float(solucion[0])],
+                "y": [float(solucion[1])],
+                "z": [float(solucion[2])],
+                "marker": {"color": "#FFD700", "size": 6, "symbol": "diamond"},
+                "name": "Solución"
+            })
+            
+        # 4. Renderizar el gráfico en el contenedor HTML
+        window.Plotly.newPlot(
+            "sys-graph-container", 
+            window.JSON.parse(json.dumps(trazos)), 
+            window.JSON.parse(json.dumps(layout)), 
+            window.JSON.parse(json.dumps(config))
+        )
     # --------------------------------------------------
     # Lógica de Interfaz: Estadística Descriptiva (Tus métodos previos)
     # --------------------------------------------------
