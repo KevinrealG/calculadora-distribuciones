@@ -30,8 +30,6 @@ from distributions.continuous.uniform import UniformContinuous
 from distributions.continuous.chi_square import ChiSquare
 from distributions.continuous.exponential import Exponential
 from distributions.continuous.fisher import Fisher
-#from distributions.continuous.uniform import Uniform
-#from distributions.discrete.geometric import Geometric
 
 # Importación de la lógica de estadística descriptiva
 from estadistica.descriptive import procesar_estadistica_descriptiva
@@ -60,13 +58,16 @@ class Application:
         self.calculate_desc_proxy = create_proxy(
             self.calculate_descriptive
         )
-        # 1. Creamos los proxies para cada pestaña descriptiva
+        # 1. Creamos los proxies para cada pestaña descriptiva y álgebra
         self.calc_uni_proxy = create_proxy(self.calcular_univariado)
         self.calc_agr_proxy = create_proxy(self.calcular_agrupados)
         self.calc_cual_proxy = create_proxy(self.calcular_cualitativas)
         self.calc_cualf_proxy = create_proxy(self.calcular_cualitativas_freq)
         self.calc_cont_proxy = create_proxy(self.calcular_contingencia)
         self.calc_biv_proxy = create_proxy(self.calcular_bivariado)
+        
+        # NUEVO: Proxy para Álgebra Lineal
+        self.calc_al_proxy = create_proxy(self.calcular_algebra)
 
     # --------------------------------------------------
     # Inicio
@@ -125,6 +126,7 @@ class Application:
                 "click", 
                 self.calculate_desc_proxy
             )
+            
         # 2. Conectamos cada botón HTML con su proxy en Python
         botones = {
             "calc-uni-btn": self.calc_uni_proxy,
@@ -132,7 +134,8 @@ class Application:
             "calc-cual-btn": self.calc_cual_proxy,
             "calc-cualf-btn": self.calc_cualf_proxy,
             "calc-cont-btn": self.calc_cont_proxy,
-            "calc-biv-btn": self.calc_biv_proxy
+            "calc-biv-btn": self.calc_biv_proxy,
+            "calc-al-btn": self.calc_al_proxy  # NUEVO: Evento Álgebra Lineal
         }
 
         for btn_id, proxy in botones.items():
@@ -140,44 +143,130 @@ class Application:
             if btn:
                 btn.addEventListener("click", proxy)
 
+
     # --------------------------------------------------
-    # Lógica de Interfaz: Estadística Descriptiva
+    # NUEVO: Lógica de Interfaz: Álgebra Lineal
+    # --------------------------------------------------
+    
+    def calcular_algebra(self, event=None):
+        print("Calculando Álgebra Lineal...")
+        
+        # 1. Obtener contenedores de la interfaz
+        editor = document.getElementById("al-visual-editor")
+        resultados = document.getElementById("al-results-body")
+        resultados.innerHTML = "<p>Calculando...</p>"
+
+        matrices = []
+        escalar = None
+
+        # 2. Extraer matrices y escalares del editor visual
+        for child in editor.children:
+            if "matrix-wrapper" in child.className:
+                brackets = child.querySelector(".matrix-brackets")
+                rows = int(brackets.getAttribute("data-rows"))
+                cols = int(brackets.getAttribute("data-cols"))
+                inputs = brackets.querySelectorAll("input")
+                
+                try:
+                    # Convertir inputs vacíos en 0.0
+                    valores = [float(inp.value) if inp.value else 0.0 for inp in inputs]
+                    matriz_np = np.array(valores).reshape((rows, cols))
+                    matrices.append(matriz_np)
+                except ValueError:
+                    resultados.innerHTML = "<p style='color:red;'>⚠️ Error: Ingresa solo números válidos en la matriz.</p>"
+                    return
+                    
+            elif "scalar-wrapper" in child.className:
+                input_esc = child.querySelector("input")
+                try:
+                    escalar = float(input_esc.value) if input_esc.value else 1.0
+                except ValueError:
+                    pass
+
+        # 3. Lógica principal para UNA sola matriz
+        if len(matrices) == 1:
+            A = matrices[0]
+            is_square = (A.shape[0] == A.shape[1])
+            
+            # Función auxiliar para formatear matrices a HTML
+            def mat_to_html(mat):
+                # Redondear y formatear para visualización
+                return "<pre style='font-family: monospace; font-size: 1.1em; background: #f8f9fa; padding: 10px; border-radius: 5px;'>" + str(np.round(mat, 4)) + "</pre>"
+
+            html = f"<h5>Matriz Original $A$:</h5>{mat_to_html(A)}<hr>"
+            html += "<div class='grid-x grid-margin-x'>"
+            
+            # --- PROPIEDADES GENERALES ---
+            html += "<div class='cell medium-6'>"
+            html += "<p>📌 <strong>Transpuesta ($A^T$):</strong><br>" + mat_to_html(A.T) + "</p>"
+            html += "<p>📌 <strong>Hermitiana ($A^H$):</strong><br>" + mat_to_html(np.conjugate(A.T)) + "</p>"
+            html += f"<p>📌 <strong>Rango:</strong> {np.linalg.matrix_rank(A)}</p>"
+            html += f"<p>📌 <strong>Norma (Frobenius):</strong> {np.linalg.norm(A):.4f}</p>"
+            
+            if escalar is not None:
+                html += f"<p>📌 <strong>Producto por escalar ({escalar} \\times A):</strong><br>" + mat_to_html(escalar * A) + "</p>"
+            html += "</div>"
+            
+            # --- PROPIEDADES PARA MATRICES CUADRADAS ---
+            html += "<div class='cell medium-6'>"
+            if is_square:
+                html += f"<p>📌 <strong>Traza:</strong> {np.trace(A):.4f}</p>"
+                try:
+                    det = np.linalg.det(A)
+                    html += f"<p>📌 <strong>Determinante:</strong> {det:.4f}</p>"
+                    html += f"<p>📌 <strong>Condición:</strong> {np.linalg.cond(A):.4f}</p>"
+                    
+                    # Inversa
+                    if abs(det) > 1e-10:
+                        html += "<p>📌 <strong>Inversa ($A^{{-1}}$):</strong><br>" + mat_to_html(np.linalg.inv(A)) + "</p>"
+                    else:
+                        html += "<p>📌 <strong>Inversa:</strong> Matriz singular (Determinante = 0, no tiene inversa).</p>"
+                        
+                    # Eigenvalores y Eigenvectores
+                    eigenval, eigenvec = np.linalg.eig(A)
+                    html += "<p>📌 <strong>Eigenvalores ($\\lambda$):</strong><br>" + mat_to_html(eigenval) + "</p>"
+                    html += "<p>📌 <strong>Eigenvectores:</strong><br>" + mat_to_html(eigenvec) + "</p>"
+                    html += "<p>📌 <strong>Diagonalización ($D$):</strong><br>" + mat_to_html(np.diag(eigenval)) + "</p>"
+                    
+                except Exception as e:
+                    html += f"<p style='color:red;'>⚠️ Error en cálculos avanzados: {str(e)}</p>"
+            else:
+                html += "<div class='callout warning'><em>La matriz no es cuadrada. La Traza, Determinante, Inversa, Eigenvalores y Diagonalización no aplican.</em></div>"
+            
+            html += "</div></div>"
+            
+            # 4. Mostrar resultados y renderizar matemáticas con MathJax
+            resultados.innerHTML = html
+            if hasattr(window, 'MathJax'):
+                window.MathJax.typesetPromise()
+
+        elif len(matrices) > 1:
+            resultados.innerHTML = "<p>Has introducido múltiples matrices. Las operaciones (suma, resta, producto) están en construcción.</p>"
+        else:
+            resultados.innerHTML = "<p style='color:#666; font-style:italic;'>El procedimiento aparecerá aquí... Asegúrate de ingresar una matriz.</p>"
+
+    # --------------------------------------------------
+    # Lógica de Interfaz: Estadística Descriptiva (Tus métodos previos)
     # --------------------------------------------------
     
     def calculate_descriptive(self, event=None):
-        """
-        Captura los datos de la tabla dinámica HTML,
-        los formatea y los envía a procesar a la lógica de Python.
-        """
         try:
-            # 1. Seleccionamos todas las entradas de valores y frecuencias de la tabla HTML
             inputs_valores = document.querySelectorAll(".fila-valor")
             inputs_frecuencias = document.querySelectorAll(".fila-frecuencia")
-            
             valores_lista = []
             
-            # Recorremos cada fila para extraer la información
             for val_input, freq_input in zip(inputs_valores, inputs_frecuencias):
                 val = val_input.value.strip()
                 freq = freq_input.value.strip()
-                
-                # Solo procesamos si ambos campos de la fila tienen datos
                 if val != "" and freq != "":
                     try:
-                        # Convertimos la frecuencia a entero para saber cuántas veces repetir el valor
                         f = int(freq)
-                        # Agregamos el valor a la lista tantas veces como indique la frecuencia
                         valores_lista.extend([val] * f)
                     except ValueError:
-                        pass # Ignoramos filas con errores tipográficos sutiles
+                        pass
                         
-            # Unimos la lista final con espacios para que sea leída por nuestra función existente
             datos_texto = " ".join(valores_lista)
-            
-            # 2. Llamamos a nuestra función de cálculo en Python
             resultados = procesar_estadistica_descriptiva(datos_texto)
-            
-            # 3. Ubicamos el contenedor en el HTML y mostramos los resultados
             contenedor = document.getElementById("desc-stats-container")
             
             if "error" in resultados:
@@ -185,9 +274,7 @@ class Application:
             else:
                 html_salida = f"""
                 <table class="hover">
-                    <thead>
-                        <tr><th>Métrica</th><th>Valor</th></tr>
-                    </thead>
+                    <thead><tr><th>Métrica</th><th>Valor</th></tr></thead>
                     <tbody>
                         <tr><td>Muestra Total (n)</td><td>{resultados.get('n', '-')}</td></tr>
                         <tr><td>Media</td><td>{resultados.get('media', '-')}</td></tr>
@@ -207,29 +294,22 @@ class Application:
         except Exception as e:
             print(f"Error procesando descriptiva: {e}")
 
-
     def mostrar_error_desc(self, mensaje):
-        """Función auxiliar para mostrar alertas en la interfaz."""
         contenedor = document.getElementById("desc-error-container")
         if contenedor:
             contenedor.innerHTML = f"<div class='callout alert' style='margin-bottom: 1rem;'>⚠️ {mensaje}</div>"
 
     def calcular_univariado(self, event=None):
         print("Calculando Numérico Univariado...")
-        
-        # Limpiamos errores previos
         document.getElementById("desc-error-container").innerHTML = ""
         
         try:
-            # 1. RECOPILACIÓN DE DATOS
             texto = document.getElementById("uni-data-txt").value.strip()
             valores = []
             
             if texto:
-                # Entrada por texto
                 valores = [float(x) for x in texto.replace(',', ' ').split() if x.strip()]
             else:
-                # Entrada por lista/filas dinámicas
                 inputs_val = document.querySelectorAll(".val-uni")
                 for inp in inputs_val:
                     v = inp.value.strip()
@@ -243,19 +323,16 @@ class Application:
             data = np.array(valores)
             n_total = len(data)
 
-            # 2. CÁLCULO DE ESTADÍSTICAS, IQR Y OUTLIERS
             from estadistica.descriptive import procesar_estadistica_descriptiva
             datos_texto = " ".join(map(str, valores))
             stats = procesar_estadistica_descriptiva(datos_texto)
             
-            # Nuevos cálculos
             q1 = stats.get('q1', 0)
             q3 = stats.get('q3', 0)
             iqr = q3 - q1
             lim_inf = q1 - 1.5 * iqr
             lim_sup = q3 + 1.5 * iqr
             
-            # Detección de outliers
             outliers = [v for v in valores if v < lim_inf or v > lim_sup]
             outliers_str = ", ".join(map(str, outliers)) if outliers else "Ninguno"
 
@@ -276,11 +353,9 @@ class Application:
             """
             document.getElementById("uni-stats").innerHTML = html_stats
 
-            # 3. TABLA DE FRECUENCIAS
             k = int(1 + 3.322 * np.log10(n_total)) if n_total > 0 else 1
             frecuencias, limites = np.histogram(data, bins=k)
             
-            # CONVERSIÓN para evitar el error JSON "int32 is not JSON serializable"
             frecuencias_list = frecuencias.tolist()
             limites_list = limites.tolist()
             
@@ -294,20 +369,15 @@ class Application:
             
             document.getElementById("uni-frec").innerHTML = html_frec
 
-            # 4. GRÁFICAS CON PLOTLY
-            # 4. GRÁFICAS CON PLOTLY
             layout_base = {
                 "paper_bgcolor": "rgba(0,0,0,0)",
                 "plot_bgcolor": "rgba(0,0,0,0)",
-                "font": {"color": "#666666"}, # Color visible para los textos
+                "font": {"color": "#666666"},
                 "margin": {"t": 50, "b": 50, "l": 50, "r": 20},
-                "autosize": True # Asegura que tome el tamaño del contenedor
+                "autosize": True
             }
             
-            # Configuración para hacer la gráfica responsive
             config_plotly = {"responsive": True}
-
-            # Convertimos data a flotantes nativos para JSON
             data_py = [float(x) for x in data]
 
             document.getElementById("uni-graf").innerHTML = """
@@ -315,7 +385,6 @@ class Application:
                 <div id='uni-box-container' style='width: 100%;'></div>
             """
 
-            # A) Render Histograma
             hist_data = [{
                 "x": data_py,
                 "type": "histogram",
@@ -329,15 +398,8 @@ class Application:
                 "yaxis": {"title": "Frecuencia Absoluta"}
             }
             
-            # Enviamos data, layout y config
-            window.Plotly.newPlot(
-                "uni-hist-container", 
-                window.JSON.parse(json.dumps(hist_data)), 
-                window.JSON.parse(json.dumps(hist_layout)),
-                window.JSON.parse(json.dumps(config_plotly))
-            )
+            window.Plotly.newPlot("uni-hist-container", window.JSON.parse(json.dumps(hist_data)), window.JSON.parse(json.dumps(hist_layout)), window.JSON.parse(json.dumps(config_plotly)))
 
-            # B) Render Boxplot
             box_data = [{
                 "x": data_py,
                 "type": "box",
@@ -349,14 +411,8 @@ class Application:
                 "title": "Diagrama de Caja (Boxplot)",
                 "xaxis": {"title": "Valores (X)"}
             }
-            window.Plotly.newPlot(
-                "uni-box-container", 
-                window.JSON.parse(json.dumps(box_data)), 
-                window.JSON.parse(json.dumps(box_layout)),
-                window.JSON.parse(json.dumps(config_plotly))
-            )
+            window.Plotly.newPlot("uni-box-container", window.JSON.parse(json.dumps(box_data)), window.JSON.parse(json.dumps(box_layout)), window.JSON.parse(json.dumps(config_plotly)))
 
-            # C) Polígono / Ojiva
             frec_acumulada_arr = np.cumsum(frecuencias_list).tolist()
             x_vals = [(limites_list[i] + limites_list[i+1])/2 for i in range(len(frecuencias_list))]
             
@@ -374,30 +430,21 @@ class Application:
                 "xaxis": {"title": "Marcas de Clase"},
                 "yaxis": {"title": "Frecuencia Acumulada"}
             }
-            window.Plotly.newPlot(
-                "uni-ojiva", 
-                window.JSON.parse(json.dumps(ojiva_data)), 
-                window.JSON.parse(json.dumps(ojiva_layout)),
-                window.JSON.parse(json.dumps(config_plotly))
-            )
+            window.Plotly.newPlot("uni-ojiva", window.JSON.parse(json.dumps(ojiva_data)), window.JSON.parse(json.dumps(ojiva_layout)), window.JSON.parse(json.dumps(config_plotly)))
+            
         except Exception as e:
             self.mostrar_error_desc(f"Ocurrió un error al procesar los datos: {str(e)}")
-    # --------------------------------------------------
-    # Lógica de Interfaz: Numérico Agrupados
-    # --------------------------------------------------
 
     def calcular_agrupados(self, event=None):
         print("Calculando Numérico Agrupados...")
         document.getElementById("desc-error-container").innerHTML = ""
         
         try:
-            # 1. RECOPILACIÓN DE DATOS
             texto = document.getElementById("agr-data-txt").value.strip()
             clases = []
             frecuencias = []
             
             if texto:
-                # Entrada por texto: "10-20, 5; 20-30, 8"
                 pares = texto.split(';')
                 for par in pares:
                     if ',' in par:
@@ -405,7 +452,6 @@ class Application:
                         clases.append(c.strip())
                         frecuencias.append(int(f.strip()))
             else:
-                # Entrada por filas dinámicas
                 filas = document.querySelectorAll("#tbody-agr tr")
                 for fila in filas:
                     inputs = fila.querySelectorAll("input")
@@ -420,11 +466,9 @@ class Application:
                 self.mostrar_error_desc("Ingresa clases y frecuencias válidas.")
                 return
 
-            # 2. CÁLCULOS MATEMÁTICOS
             marcas_clase = []
             limites_sup = []
             
-            # Extraer puntos medios y límites superiores para las gráficas
             for c in clases:
                 partes = c.split('-')
                 if len(partes) == 2:
@@ -432,7 +476,6 @@ class Application:
                     marcas_clase.append((inf + sup) / 2)
                     limites_sup.append(sup)
                 else:
-                    # En caso de que se ingrese un solo número en lugar de rango
                     marcas_clase.append(float(c))
                     limites_sup.append(float(c))
                     
@@ -445,7 +488,6 @@ class Application:
             varianza = sum(f * (m - media)**2 for m, f in zip(marcas_clase, frecuencias)) / (n_total - 1 if n_total > 1 else 1)
             desviacion = np.sqrt(varianza)
 
-            # 3. TABLA DE FRECUENCIAS Y ESTADÍSTICAS
             frec_acum = np.cumsum(frecuencias).tolist()
             
             html_frec = "<table class='hover'><thead><tr><th>Clase</th><th>Marca (X)</th><th>Frec. Absoluta</th><th>Frec. Acumulada</th></tr></thead><tbody>"
@@ -467,7 +509,6 @@ class Application:
             """
             document.getElementById("agr-stats").innerHTML = html_stats
 
-            # 4. GRÁFICAS CON PLOTLY
             layout_base = {
                 "paper_bgcolor": "rgba(0,0,0,0)",
                 "plot_bgcolor": "rgba(0,0,0,0)",
@@ -477,7 +518,6 @@ class Application:
             }
             config_plotly = {"responsive": True}
 
-            # Histograma (Gráfico de barras sin separación)
             hist_data = [{
                 "x": clases,
                 "y": frecuencias,
@@ -489,11 +529,10 @@ class Application:
                 "title": "Histograma de Frecuencias Agrupadas",
                 "xaxis": {"title": "Intervalos de Clase"},
                 "yaxis": {"title": "Frecuencia Absoluta"},
-                "bargap": 0  # Esto une las barras como en un histograma real
+                "bargap": 0
             }
             window.Plotly.newPlot("agr-hist", window.JSON.parse(json.dumps(hist_data)), window.JSON.parse(json.dumps(hist_layout)), window.JSON.parse(json.dumps(config_plotly)))
 
-            # Ojiva
             ojiva_data = [{
                 "x": [float(x) for x in limites_sup],
                 "y": [float(y) for y in frec_acum],
@@ -513,27 +552,20 @@ class Application:
         except Exception as e:
             self.mostrar_error_desc(f"Error en datos agrupados: Verifica que el formato sea válido (Ej: 10-20, 5). Detalle técnico: {str(e)}")
         
-    # --------------------------------------------------
-    # Lógica de Interfaz: Datos Cualitativos
-    # --------------------------------------------------
-
     def calcular_cualitativas(self, event=None):
         print("Calculando Cualitativo...")
         document.getElementById("desc-error-container").innerHTML = ""
         
         try:
-            # 1. RECOPILACIÓN DE DATOS
             texto = document.getElementById("cual-data-txt").value.strip()
             
             if not texto:
                 self.mostrar_error_desc("Ingresa datos cualitativos válidos (ej: Perro, Gato, Perro).")
                 return
                 
-            # Separar por comas y limpiar espacios
             datos = [x.strip() for x in texto.split(',') if x.strip()]
             n_total = len(datos)
             
-            # 2. CÁLCULO DE FRECUENCIAS
             frecuencias = {}
             for item in datos:
                 frecuencias[item] = frecuencias.get(item, 0) + 1
@@ -541,12 +573,10 @@ class Application:
             categorias = list(frecuencias.keys())
             conteos = list(frecuencias.values())
             
-            # Calcular la moda (la categoría o categorías que más se repiten)
             max_frec = max(conteos)
             modas = [cat for cat, frec in frecuencias.items() if frec == max_frec]
             moda_str = ", ".join(modas)
             
-            # 3. TABLAS HTML
             html_frec = "<table class='hover'><thead><tr><th>Categoría</th><th>Frecuencia Absoluta</th><th>Porcentaje</th></tr></thead><tbody>"
             for cat, count in frecuencias.items():
                 porcentaje = (count / n_total) * 100
@@ -565,7 +595,6 @@ class Application:
             """
             document.getElementById("cual-stats").innerHTML = html_stats
             
-            # 4. GRÁFICAS CON PLOTLY
             layout_base = {
                 "paper_bgcolor": "rgba(0,0,0,0)",
                 "plot_bgcolor": "rgba(0,0,0,0)",
@@ -575,7 +604,6 @@ class Application:
             }
             config_plotly = {"responsive": True}
             
-            # Gráfico de Barras
             bar_data = [{
                 "x": categorias, 
                 "y": conteos, 
@@ -590,12 +618,11 @@ class Application:
             }
             window.Plotly.newPlot("cual-bar", window.JSON.parse(json.dumps(bar_data)), window.JSON.parse(json.dumps(bar_layout)), window.JSON.parse(json.dumps(config_plotly)))
             
-            # Gráfico Circular (Pie Chart)
             pie_data = [{
                 "labels": categorias, 
                 "values": conteos, 
                 "type": "pie",
-                "hole": 0.3, # Para que sea un gráfico de dona (opcional)
+                "hole": 0.3,
                 "marker": {"colors": ["#e83e8c", "#4a54e1", "#4CAF50", "#FFC107", "#00BCD4"]}
             }]
             pie_layout = {
@@ -609,10 +636,9 @@ class Application:
         
     def calcular_cualitativas_freq(self, event=None):
         error_box = document.getElementById("cualf-error-container")
-        error_box.innerHTML = "" # Limpiar errores previos
+        error_box.innerHTML = ""
         
         try:
-            # 1. Recopilar datos de la tabla dinámica
             tbody = document.getElementById("tbody-cual-freq")
             filas = tbody.getElementsByTagName("tr")
             
@@ -622,7 +648,6 @@ class Application:
             
             for i in range(filas.length):
                 inputs = filas[i].getElementsByTagName("input")
-                # Asegurarse de que la fila tenga los dos inputs
                 if inputs.length >= 2: 
                     cat = inputs[0].value.strip()
                     frec_str = inputs[1].value.strip()
@@ -637,7 +662,6 @@ class Application:
                 error_box.innerHTML = "⚠️ Ingresa al menos una categoría con frecuencia válida."
                 return
                 
-            # 2. Generar Tabla HTML
             html_frec = "<table class='hover'><thead><tr><th>Categoría</th><th>Frecuencia</th><th>Porcentaje</th></tr></thead><tbody>"
             for cat, frec in zip(categorias, frecuencias):
                 porcentaje = (frec / n_total) * 100
@@ -648,7 +672,6 @@ class Application:
             
             document.getElementById("cualf-frec").innerHTML = html_frec
             
-            # 3. Gráficos Plotly
             layout_base = {
                 "paper_bgcolor": "rgba(0,0,0,0)",
                 "plot_bgcolor": "rgba(0,0,0,0)",
@@ -657,12 +680,10 @@ class Application:
             }
             config_plotly = {"responsive": True}
             
-            # Gráfico de Barras en 'cualf-bar'
             bar_data = [{"x": categorias, "y": frecuencias, "type": "bar", "marker": {"color": "#e83e8c"}}]
             bar_layout = {**layout_base, "title": "Frecuencias por Categoría"}
             window.Plotly.newPlot("cualf-bar", window.JSON.parse(json.dumps(bar_data)), window.JSON.parse(json.dumps(bar_layout)), window.JSON.parse(json.dumps(config_plotly)))
             
-            # Gráfico Circular en 'cualf-circ'
             pie_data = [{"labels": categorias, "values": frecuencias, "type": "pie", "hole": 0.3}]
             pie_layout = {**layout_base, "title": "Distribución Porcentual"}
             window.Plotly.newPlot("cualf-circ", window.JSON.parse(json.dumps(pie_data)), window.JSON.parse(json.dumps(pie_layout)), window.JSON.parse(json.dumps(config_plotly)))
@@ -677,7 +698,6 @@ class Application:
         if error_box: error_box.innerHTML = ""
         
         try:
-            # 1. Leer entradas
             rows_input = document.getElementById("cont-rows").value.strip()
             cols_input = document.getElementById("cont-cols").value.strip()
             data_input = document.getElementById("cont-data").value.strip()
@@ -689,15 +709,12 @@ class Application:
             row_names = [r.strip() for r in rows_input.split(',')]
             col_names = [c.strip() for c in cols_input.split(',')]
             
-            # 2. Parsear matriz de datos
             data_matrix = []
             for line in data_input.split('\n'):
                 if line.strip():
-                    # Separar por comas o espacios
                     row_data = [int(x.strip()) for x in line.replace(',', ' ').split() if x.strip()]
                     data_matrix.append(row_data)
 
-            # Validar dimensiones
             if len(data_matrix) != len(row_names):
                 if error_box: error_box.innerHTML = f"⚠️ Esperadas {len(row_names)} filas de datos, ingresadas {len(data_matrix)}."
                 return
@@ -706,12 +723,10 @@ class Application:
                     if error_box: error_box.innerHTML = f"⚠️ Fila {i+1} necesita {len(col_names)} valores numéricos."
                     return
 
-            # Calcular totales
             row_totals = [sum(r) for r in data_matrix]
             col_totals = [sum(data_matrix[i][j] for i in range(len(row_names))) for j in range(len(col_names))]
             grand_total = sum(row_totals)
 
-            # 3. Generar Tabla HTML
             html = "<table class='hover'><thead><tr><th></th>"
             for c in col_names:
                 html += f"<th>{c}</th>"
@@ -730,7 +745,6 @@ class Application:
             
             document.getElementById("cont-tbl").innerHTML = html
 
-            # 4. Gráficos con Plotly
             config = {"responsive": True}
             layout_base = {"margin": {"t": 40, "b": 40, "l": 50, "r": 20}, "autosize": True}
             
@@ -741,23 +755,18 @@ class Application:
                 y_vals = [data_matrix[i][j] for i in range(len(row_names))]
                 traces_bar.append({"x": row_names, "y": y_vals, "name": c_name, "type": "bar"})
                 
-                # Porcentajes por fila (para apiladas 100%)
                 y_pct = [(data_matrix[i][j] / row_totals[i] * 100) if row_totals[i] > 0 else 0 for i in range(len(row_names))]
                 traces_bar_pct.append({"x": row_names, "y": y_pct, "name": c_name, "type": "bar"})
 
-            # Barras Agrupadas
             layout_b1 = {**layout_base, "barmode": "group", "title": "Frecuencias Agrupadas"}
             window.Plotly.newPlot("cont-bar1", window.JSON.parse(json.dumps(traces_bar)), window.JSON.parse(json.dumps(layout_b1)), window.JSON.parse(json.dumps(config)))
 
-            # Barras Apiladas
             layout_b2 = {**layout_base, "barmode": "stack", "title": "Frecuencias Apiladas"}
             window.Plotly.newPlot("cont-bar2", window.JSON.parse(json.dumps(traces_bar)), window.JSON.parse(json.dumps(layout_b2)), window.JSON.parse(json.dumps(config)))
 
-            # Barras Porcentual (100% Stacked)
             layout_b3 = {**layout_base, "barmode": "stack", "title": "Proporción por Fila (100%)"}
             window.Plotly.newPlot("cont-bar3", window.JSON.parse(json.dumps(traces_bar_pct)), window.JSON.parse(json.dumps(layout_b3)), window.JSON.parse(json.dumps(config)))
 
-            # Mapa de Calor
             heat_data = [{"z": data_matrix, "x": col_names, "y": row_names, "type": "heatmap", "colorscale": "Viridis"}]
             layout_heat = {**layout_base, "title": "Mapa de Calor de Frecuencias"}
             window.Plotly.newPlot("cont-heat", window.JSON.parse(json.dumps(heat_data)), window.JSON.parse(json.dumps(layout_heat)), window.JSON.parse(json.dumps(config)))
@@ -774,7 +783,6 @@ class Application:
         x_data, y_data = [], []
         
         try:
-            # 1. Identificar de qué pestaña leer los datos
             txt_panel = document.getElementById("biv-txt")
             is_txt_active = "is-active" in txt_panel.className
             
@@ -797,7 +805,6 @@ class Application:
                             x_data.append(float(vx))
                             y_data.append(float(vy))
                             
-            # 2. Validaciones básicas
             if not x_data or not y_data:
                 if error_box: error_box.innerHTML = "⚠️ Ingresa datos en ambas variables."
                 return
@@ -810,18 +817,15 @@ class Application:
             x_arr = np.array(x_data)
             y_arr = np.array(y_data)
             
-            # 3. Cálculos Estadísticos
             slope, intercept, r_value, p_value, std_err = linregress(x_arr, y_arr)
             r_squared = r_value ** 2
             
-            # 4. Inyección en Tabla de Datos
             html_tbl = "<table class='hover'><thead><tr><th>N</th><th>X</th><th>Y</th></tr></thead><tbody>"
             for i in range(n):
                 html_tbl += f"<tr><td>{i+1}</td><td>{x_data[i]}</td><td>{y_data[i]}</td></tr>"
             html_tbl += "</tbody></table>"
             document.getElementById("biv-tbl").innerHTML = html_tbl
             
-            # 5. Inyección de Correlación
             document.getElementById("biv-corr").innerHTML = f"""
                 <div style="padding: 20px; text-align: center;">
                     <h3>Coeficiente de Correlación (Pearson)</h3>
@@ -830,7 +834,6 @@ class Application:
                 </div>
             """
             
-            # 6. Inyección de Regresión Lineal (Textos + Contenedor para gráfica)
             reg_html = f"""
                 <div class="grid-x grid-margin-x" style="padding: 10px;">
                     <div class="cell small-12">
@@ -841,22 +844,18 @@ class Application:
             """
             document.getElementById("biv-reg").innerHTML = reg_html
             
-            # 7. Gráficos con Plotly
             config = {"responsive": True}
             layout_base = {"margin": {"t": 40, "b": 40, "l": 50, "r": 20}, "autosize": True}
             
             trace_disp = {"x": x_data, "y": y_data, "mode": "markers", "type": "scatter", "name": "Datos Reales", "marker": {"color": "#e83e8c"}}
             
-            # Dispersión simple (Pestaña Dispersión)
             layout_disp = {**layout_base, "title": "Diagrama de Dispersión", "xaxis": {"title": "X"}, "yaxis": {"title": "Y"}}
             window.Plotly.newPlot("biv-disp", window.JSON.parse(json.dumps([trace_disp])), window.JSON.parse(json.dumps(layout_disp)), window.JSON.parse(json.dumps(config)))
             
-            # Dispersión + Línea de Regresión (Pestaña Regresión)
             y_pred = slope * x_arr + intercept
             trace_reg = {"x": x_data, "y": y_pred.tolist(), "mode": "lines", "type": "scatter", "name": "Ajuste Lineal", "line": {"color": "#17a2b8", "width": 2}}
             layout_reg = {**layout_base, "title": "Ajuste por Mínimos Cuadrados", "xaxis": {"title": "X"}, "yaxis": {"title": "Y"}}
             
-            # Dibujamos en el div creado dinámicamente 'biv-reg-plot'
             window.Plotly.newPlot("biv-reg-plot", window.JSON.parse(json.dumps([trace_disp, trace_reg])), window.JSON.parse(json.dumps(layout_reg)), window.JSON.parse(json.dumps(config)))
 
         except ValueError:
