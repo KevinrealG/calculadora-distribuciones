@@ -82,12 +82,9 @@
 <body class="light">
     <div class="page-shell">
         <div class="topbar">
-            <div class="topbar">
             <h2>Estadística Descriptiva</h2>
             <div style="display:flex; align-items:center; gap: 12px;">
-                <!-- Botón nuevo para el historial -->
                 <button class="button secondary small" data-open="historial-modal" style="margin: 0;">Ver Historial</button>
-                
                 <select id="theme-selector" class="theme-selector">
                     <option value="light">☀️ Light</option>
                     <option value="dark">🌙 Dark</option>
@@ -97,23 +94,12 @@
             </div>
         </div>
 
-        <!-- Modal de Historial (Pégalo aquí, antes del grid-x de selección de análisis) -->
         <div class="reveal" id="historial-modal" data-reveal style="border-radius: 12px; background: var(--surface); color: var(--text);">
             <h3 style="color: var(--text);">Últimos 3 Cálculos</h3>
             <div id="historial-content" style="margin-top: 15px;">No hay historial aún.</div>
             <button class="close-button" data-close aria-label="Cerrar" type="button" style="color: var(--text);">
                 <span aria-hidden="true">&times;</span>
             </button>
-        </div>
-            <h2>Estadística Descriptiva</h2>
-            <div style="display:flex; align-items:center; gap: 12px;">
-                <select id="theme-selector" class="theme-selector">
-                    <option value="light">☀️ Light</option>
-                    <option value="dark">🌙 Dark</option>
-                    <option value="pink">🩷 Pink</option>
-                </select>
-                <span class="chip">Calculadora independiente</span>
-            </div>
         </div>
 
         <div class="grid-x grid-margin-x" style="margin-bottom: 20px;">
@@ -378,6 +364,47 @@
     <script src="js/theme.js"></script>
     <script>
         const mathJaxReady = () => !!(window.MathJax && window.MathJax.typesetPromise);
+        
+        const MAX_HISTORY = 3;
+
+        function guardarEnHistorial(tipoAnalisis, datosIngresados, resumenResultado) {
+            let historial = JSON.parse(localStorage.getItem('historial_stats')) || [];
+            const nuevoRegistro = {
+                fecha: new Date().toLocaleTimeString(),
+                tipo: tipoAnalisis,
+                datos: datosIngresados,
+                resumen: resumenResultado
+            };
+            historial.unshift(nuevoRegistro);
+            if (historial.length > MAX_HISTORY) historial.pop();
+            localStorage.setItem('historial_stats', JSON.stringify(historial));
+            renderizarHistorial();
+        }
+
+        function renderizarHistorial() {
+            let historial = JSON.parse(localStorage.getItem('historial_stats')) || [];
+            const contenedor = document.getElementById('historial-content');
+            
+            if (historial.length === 0) {
+                contenedor.innerHTML = '<p>No hay cálculos recientes.</p>';
+                return;
+            }
+
+            let html = '<ul style="list-style: none; margin: 0; padding: 0;">';
+            historial.forEach(item => {
+                html += `
+                <li style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${item.tipo}</strong>
+                        <small style="color: var(--muted);">${item.fecha}</small>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9em; word-wrap: break-word;"><strong>Datos:</strong> <em>${item.datos}</em></p>
+                    <div style="font-size: 0.85em; background: var(--panel); padding: 8px; border-radius: 4px;">${item.resumen}</div>
+                </li>`;
+            });
+            html += '</ul>';
+            contenedor.innerHTML = html;
+        }
 
         function setActiveView(viewId) {
             document.querySelectorAll('.desc-sub-view').forEach(view => {
@@ -423,6 +450,8 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             $(document).foundation();
+            renderizarHistorial();
+            
             window.addEventListener('resize', resizeAllPlots);
 
             const hashView = window.location.hash ? window.location.hash.replace('#', '') : 'sub-univariado';
@@ -631,6 +660,9 @@
             const xVals = hist.map(item => (item.low + item.high) / 2);
             const yVals = hist.map((item, idx) => hist.slice(0, idx + 1).reduce((sum, i) => sum + i.freq, 0));
             Plotly.newPlot('uni-ojiva', [{ x: xVals, y: yVals, mode: 'lines+markers', type: 'scatter', marker: { color: '#4CAF50' }, line: { shape: 'spline' } }], { ...layout, title: 'Ojiva de Frecuencias Acumuladas', xaxis: { title: 'Marcas de Clase' }, yaxis: { title: 'Frecuencia Acumulada' } }, config);
+
+            let inputGuardado = texto || valores.slice(0,5).join(', ') + (valores.length > 5 ? '...' : '');
+            guardarEnHistorial('Univariado', inputGuardado, `Media: ${mean.toFixed(2)}, Mediana: ${median.toFixed(2)}, N: ${n}`);
         }
 
         function percentile(sorted, pct) {
@@ -723,6 +755,9 @@
             const layoutBase = { paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color: '#666666' }, margin: { t: 50, b: 50, l: 50, r: 20 }, autosize: true };
             Plotly.newPlot('agr-hist', [{ x: clases, y: frecuencias, type: 'bar', marker: { color: '#e83e8c' } }], { ...layoutBase, title: 'Histograma de Frecuencias Agrupadas', xaxis: { title: 'Intervalos de Clase' }, yaxis: { title: 'Frecuencia Absoluta' }, bargap: 0 }, config);
             Plotly.newPlot('agr-ojiva', [{ x: clases.map(c => Number(c.split('-')[1] || c)), y: cum, mode: 'lines+markers', type: 'scatter', marker: { color: '#4CAF50' }, line: { shape: 'spline' } }], { ...layoutBase, title: 'Ojiva (Frecuencias Acumuladas)', xaxis: { title: 'Límite Superior de Clase' }, yaxis: { title: 'Frecuencia Acumulada' } }, config);
+
+            let inputGuardado = texto || clases.slice(0,3).join(',') + '...';
+            guardarEnHistorial('Agrupados', inputGuardado, `Media: ${media.toFixed(2)}, N: ${n}`);
         }
 
         function calcularCualitativas() {
@@ -758,6 +793,9 @@
 
             renderCualitativasGraficos(categorias, conteos);
             setActiveTab('res-tabs-cual', 'cual-frec');
+
+            let inputGuardado = texto.substring(0, 30) + (texto.length > 30 ? '...' : '');
+            guardarEnHistorial('Cualitativas', inputGuardado, `Moda(s): ${modas}, N: ${total}`);
         }
 
         function calcularCualitativasFreq() {
@@ -799,6 +837,9 @@
             const layout = { paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', margin: { t: 50, b: 50, l: 50, r: 20 }, autosize: true };
             Plotly.newPlot('cualf-bar', [{ x: categorias, y: frecuencias, type: 'bar', marker: { color: '#e83e8c' } }], { ...layout, title: 'Frecuencias por Categoría' }, config);
             Plotly.newPlot('cualf-circ', [{ labels: categorias, values: frecuencias, type: 'pie', hole: 0.3 }], { ...layout, title: 'Distribución Porcentual' }, config);
+
+            let inputGuardado = categorias.slice(0,3).join(',') + (categorias.length > 3 ? '...' : '');
+            guardarEnHistorial('Cualitativas (Freq)', inputGuardado, `Categorías: ${categorias.length}, N: ${total}`);
         }
 
         function calcularContingencia() {
@@ -813,7 +854,7 @@
 
             const rowNames = rowsInput.split(',').map(v => v.trim()).filter(Boolean);
             const colNames = colsInput.split(',').map(v => v.trim()).filter(Boolean);
-            const matrix = dataInput.split('\n').filter(line => line.trim()).map(line => line.split(/[,\s]+/).map(Number).filter(v => !Number.isNaN(v)));
+            const matrix = dataInput.split(/\r?\n/).filter(line => line.trim()).map(line => line.split(/[ ,\t]+/).map(Number).filter(v => !Number.isNaN(v)));
 
             if (matrix.length !== rowNames.length) {
                 errorBox.innerHTML = `⚠️ Esperadas ${rowNames.length} filas de datos, ingresadas ${matrix.length}.`;
@@ -866,6 +907,9 @@
             Plotly.newPlot('cont-bar3', tracesPct, { ...layoutBase, barmode: 'stack', title: 'Proporción por Fila (100%)' }, config);
             Plotly.newPlot('cont-heat', [{ z: matrix, x: colNames, y: rowNames, type: 'heatmap', colorscale: 'Viridis' }], { ...layoutBase, title: 'Mapa de Calor de Frecuencias' }, config);
             errorBox.innerHTML = '';
+
+            let inputGuardado = `Filas: ${rowNames.join(',')} | Cols: ${colNames.join(',')}`;
+            guardarEnHistorial('Contingencia', inputGuardado, `Total datos: ${grandTotal}`);
         }
 
         function calcularBivariado() {
@@ -939,6 +983,9 @@
             Plotly.newPlot('biv-disp', [{ x: xData, y: yData, mode: 'markers', type: 'scatter', name: 'Datos Reales', marker: { color: '#e83e8c' } }], { ...layoutBase, title: 'Diagrama de Dispersión', xaxis: { title: 'X' }, yaxis: { title: 'Y' } }, config);
             const yPred = xData.map(x => slope * x + intercept);
             Plotly.newPlot('biv-reg-plot', [{ x: xData, y: yData, mode: 'markers', type: 'scatter', name: 'Datos Reales', marker: { color: '#e83e8c' } }, { x: xData, y: yPred, mode: 'lines', type: 'scatter', name: 'Ajuste Lineal', line: { color: '#17a2b8', width: 2 } }], { ...layoutBase, title: 'Ajuste por Mínimos Cuadrados', xaxis: { title: 'X' }, yaxis: { title: 'Y' } }, config);
+
+            let inputGuardado = `n = ${n} pares de datos`;
+            guardarEnHistorial('Bivariado', inputGuardado, `r = ${r.toFixed(4)}, Pendiente = ${slope.toFixed(4)}`);
         }
     </script>
 </body>
