@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álgebra Lineal - Bachué Data Toolbox</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <link rel="stylesheet" href="css/themes/darkmode.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/themes/pinkmode.css">
+    <style>
+        body { background: #0f172a; color: #e5e7eb; font-family: Arial, sans-serif; }
+        .page-shell { max-width: 1400px; margin: 0 auto; padding: 24px 20px 40px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .topbar h2 { margin: 0; color: #fff; }
+        .chip { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+        .al-sub-view { display: none; }
+        .al-sub-view.active { display: block; }
+        .al-card {
+            background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+        }
+        .al-size-selector { margin-bottom: 18px; }
+        .al-editor-container { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 16px; }
+        .al-visual-editor {
+            min-height: 220px; border: 1px dashed rgba(148,163,184,.4); border-radius: 12px; padding: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: rgba(255,255,255,0.02);
+        }
+        .matrix-wrapper, .scalar-wrapper {
+            position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 12px 10px 10px; border: 1px solid rgba(59,130,246,.35); border-radius: 10px; background: rgba(59,130,246,.08); min-width: 100px; cursor: pointer;
+        }
+        .matrix-wrapper.selected, .scalar-wrapper.selected { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.22); }
+        .matrix-brackets {
+            display: grid; gap: 6px; padding: 6px; border-radius: 8px; border: 1px solid rgba(148,163,184,.3); background: rgba(255,255,255,.02);
+        }
+        .matrix-cell-input, .scalar-input {
+            width: 52px; height: 32px; border-radius: 6px; border: 1px solid rgba(148,163,184,.35); background: rgba(255,255,255,.04); color: #fff; text-align: center;
+        }
+        .matrix-controls { position: absolute; top: -10px; right: -10px; }
+        .matrix-btn-action { background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
+        .al-visual-operator { font-size: 2rem; font-weight: bold; color: #f8fafc; }
+        .al-editor-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .al-solve-btn {
+            margin-left: auto; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; cursor: pointer;
+        }
+        .al-results-header { border-bottom: 1px solid rgba(148,163,184,.2); padding-bottom: 8px; margin-bottom: 10px; }
+        .al-matrix-popup {
+            position: absolute; top: 48px; left: 0; z-index: 5; width: 260px; background: #111827; border: 1px solid rgba(148,163,184,.25); border-radius: 10px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.25);
+        }
+        .al-popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .al-close-btn { background: transparent; border: none; color: #fff; cursor: pointer; }
+        .al-matrix-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+        .matrix-cell { width: 14px; height: 14px; border-radius: 3px; background: rgba(148,163,184,.14); border: 1px solid rgba(148,163,184,.2); }
+        .matrix-cell.active { background: #3b82f6; }
+        .sto { color: #67e8f9; }
+        .sidebar-panel { background: rgba(15,23,42,.85); border: 1px solid rgba(148,163,184,.25); border-radius: 12px; padding: 16px; }
+        .table-inputs { width: 100%; }
+        .table-inputs input { width: 100%; }
+        .desc-sub-view .card { background: rgba(15,23,42,.8); }
+        .tab-pane { display: none; }
+        .tab-pane.is-active { display: block; }
+        .matrix-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        @media (max-width: 768px) {
+            .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .al-editor-actions { align-items: stretch; }
+            .al-solve-btn { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="topbar">
+            <h2>Álgebra Lineal</h2>
+            <span class="chip">Calculadora independiente</span>
+        </div>
+
+        <div class="grid-x grid-margin-x" style="margin-bottom: 20px;">
+            <div class="cell small-12 medium-6 large-4">
+                <label for="al-view-selector" style="font-weight: bold; color: white;">Selecciona el tipo de análisis:</label>
+                <select id="al-view-selector" style="border-radius: 5px;">
+                    <option value="al-sub-matrices">📐 Matrices</option>
+                    <option value="al-sub-vectores">📏 Vectores</option>
+                    <option value="al-sub-sistemas">🔢 Sistemas</option>
+                    <option value="al-sub-transformaciones">🔄 Transformaciones</option>
+                    <option value="al-sub-especiales">🎯 Matrices Especiales</option>
+                    <option value="al-sub-propiedades">✅ Propiedades</option>
+                    <option value="al-sub-aleatoria">🎲 Aleatoria</option>
+                    <option value="al-sub-guia">📖 Guía</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="al-sub-views-container">
+            <div id="al-sub-matrices" class="al-sub-view active">
+                <div class="al-size-selector card" style="padding: 10px; margin-bottom: 15px;">
+                    <div class="grid-x grid-padding-x align-center">
+                        <button class="button tiny hollow" onclick="insertMatrix(2,2)">(2×2)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(2,3)">(2×3)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(3,3)">(3×3)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(3,2)">(3×2)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(4,4)">(4×4)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(3,4)">(3×4)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(2,4)">(2×4)</button>
+                        <button class="button tiny hollow" onclick="insertMatrix(5,5)">(5×5)</button>
+                        <div class="al-custom-size-wrapper" style="position: relative; display: inline-block;">
+                            <button class="button tiny secondary" onclick="toggleMatrixPopup(event)">⚙️ Personalizado</button>
+                            <div id="matrix-popup" class="al-matrix-popup" style="display: none;">
+                                <div class="al-popup-header">
+                                    <span id="matrixSizeTxt">Tamaño de la matriz: 1x1</span>
+                                    <button class="al-close-btn" onclick="toggleMatrixPopup(event)">cerrar</button>
+                                </div>
+                                <div id="matrixGrid" class="al-matrix-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="al-editor-container">
+                    <div class="al-visual-editor" id="al-visual-editor" tabindex="0">
+                        <div id="al-placeholder" style="color: #999; font-style: italic;">Selecciona un tamaño arriba para comenzar...</div>
+                    </div>
+                    <div class="al-editor-actions">
+                        <button class="button tiny secondary" onclick="addScalar()">🔢 Escalar</button>
+                        <button class="button tiny secondary" onclick="addMatrixOperator('+')">➕</button>
+                        <button class="button tiny secondary" onclick="addMatrixOperator('-')">➖</button>
+                        <button class="button tiny secondary" onclick="addMatrixOperator('*')">✖️</button>
+                        <button class="button tiny secondary" onclick="addMatrixOperator('=')">🟰</button>
+                        <div style="flex-grow: 1;"></div>
+                        <button id="calc-al-btn" class="al-solve-btn" onclick="solveLinearAlgebra()">Resolver</button>
+                    </div>
+                </div>
+
+                <div class="al-card" style="margin-top: 20px;">
+                    <div class="al-results-header"><h4>Resultados</h4></div>
+                    <div id="al-results-body"><p style="color: #666; font-style: italic;">El procedimiento aparecerá aquí...</p></div>
+                </div>
+            </div>
+
+            <div id="al-sub-vectores" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Vectores</h4>
+                    <p>Calcula módulo, suma, producto escalar y combinación lineal.</p>
+                    <div class="grid-x grid-margin-x">
+                        <div class="cell small-12 medium-6">
+                            <label>Vector u</label>
+                            <input id="vec-u" type="text" value="1, 2, 3">
+                        </div>
+                        <div class="cell small-12 medium-6">
+                            <label>Vector v</label>
+                            <input id="vec-v" type="text" value="4, -1, 2">
+                        </div>
+                    </div>
+                    <button class="button success" onclick="solveVectors()">Calcular</button>
+                    <div id="vec-result" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+
+            <div id="al-sub-sistemas" class="al-sub-view">
+                <div class="grid-x grid-margin-x">
+                    <aside class="cell small-12 medium-5 large-4 sidebar-panel">
+                        <div class="card" style="box-shadow: none; background: transparent; border: none; color: white;">
+                            <div class="card-divider" style="background: #2563eb; color: white; border-radius: 8px 8px 0 0;">Configuración del Sistema</div>
+                            <div class="card-section">
+                                <label for="sys-dimension" style="font-weight: bold; margin-bottom: 5px;">Dimensión del Sistema:</label>
+                                <select id="sys-dimension" class="theme-selector" style="width: 100%; margin-bottom: 15px;" onchange="cambiarDimensionSistema()">
+                                    <option value="2">Sistema 2x2 (2D)</option>
+                                    <option value="3">Sistema 3x3 (3D)</option>
+                                </select>
+                                <div id="sys-inputs-container"></div>
+                                <button id="calc-sys-btn" class="button expanded success" style="margin-top: 15px; background-color: #ff6b6b;" onclick="solveSystem()">Graficar y Resolver</button>
+                                <div id="sys-error" style="color: red; margin-top: 10px; font-size: 0.9rem;"></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <main class="cell small-12 medium-7 large-8">
+                        <div class="al-card" style="margin-bottom: 15px;">
+                            <h5 style="margin-bottom: 10px;">Visualización Gráfica</h5>
+                            <div id="sys-graph-container" style="width: 100%; height: 450px;"></div>
+                        </div>
+                        <div class="al-card">
+                            <h5 style="margin-bottom: 10px;">Solución Analítica</h5>
+                            <div id="sys-result-body">
+                                <p style="color: #666; font-style: italic;">La solución del sistema aparecerá aquí...</p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+
+            <div id="al-sub-transformaciones" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Transformaciones</h4>
+                    <p>Ejemplos frecuentes: rotación, reflexión, escalado y proyección.</p>
+                    <div class="matrix-card-grid">
+                        <div>
+                            <h5>Escalado</h5>
+                            <pre>[[k,0],[0,k]]</pre>
+                        </div>
+                        <div>
+                            <h5>Reflexión</h5>
+                            <pre>[[1,0],[0,-1]]</pre>
+                        </div>
+                        <div>
+                            <h5>Rotación</h5>
+                            <pre>[[cosθ, -sinθ],[sinθ, cosθ]]</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="al-sub-especiales" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Matrices Especiales</h4>
+                    <ul>
+                        <li>Identidad: filas/columnas con 1 en la diagonal.</li>
+                        <li>Diagonal: solo entradas de la diagonal son distintas de cero.</li>
+                        <li>Triangular: superior o inferior.</li>
+                        <li>Simétrica: A = Aᵀ.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="al-sub-propiedades" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Propiedades</h4>
+                    <ul>
+                        <li>Determinante = 0: matriz singular.</li>
+                        <li>Rango máximo: menor entre filas y columnas.</li>
+                        <li>Traza: suma de elementos diagonales.</li>
+                        <li>Inversa solo si det ≠ 0.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="al-sub-aleatoria" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Aleatoria</h4>
+                    <p>Se puede generar matrices aleatorias con valores entre 0 y 1, o con una distribución específica para pruebas.</p>
+                    <button class="button success" onclick="generateRandomMatrix()">Generar matriz aleatoria 3x3</button>
+                    <div id="random-matrix-output" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+
+            <div id="al-sub-guia" class="al-sub-view">
+                <div class="al-card">
+                    <h4>Guía rápida</h4>
+                    <ol>
+                        <li>Elige la operación y crea la matriz con el tamaño deseado.</li>
+                        <li>Completa los valores numéricos.</li>
+                        <li>Usa “Resolver” para ver la solución.</li>
+                        <li>Para sistemas 2x2 y 3x3, ingresa los coeficientes.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selector = document.getElementById('al-view-selector');
+            if (selector) {
+                selector.addEventListener('change', function (e) {
+                    document.querySelectorAll('.al-sub-view').forEach(view => view.classList.remove('active'));
+                    const target = document.getElementById(e.target.value);
+                    if (target) target.classList.add('active');
+                });
+            }
+
+            initMatrixGrid();
+            cambiarDimensionSistema();
+        });
+
+        function toggleMatrixPopup(e) {
+            if (e) e.stopPropagation();
+            const popup = document.getElementById('matrix-popup');
+            if (!popup) return;
+            const visible = popup.style.display === 'block';
+            popup.style.display = visible ? 'none' : 'block';
+            if (!visible) {
+                highlightCells(1, 1);
+                const sizeTxt = document.getElementById('matrixSizeTxt');
+                if (sizeTxt) sizeTxt.textContent = 'Tamaño de la matriz: 1x1';
+            }
+        }
+
+        function initMatrixGrid() {
+            const grid = document.getElementById('matrixGrid');
+            const sizeTxt = document.getElementById('matrixSizeTxt');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (let r = 1; r <= 10; r++) {
+                for (let c = 1; c <= 10; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('mouseover', () => {
+                        highlightCells(r, c);
+                        if (sizeTxt) sizeTxt.textContent = `Tamaño de la matriz: ${r}x${c}`;
+                    });
+                    cell.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        insertMatrix(r, c);
+                        const popup = document.getElementById('matrix-popup');
+                        if (popup) popup.style.display = 'none';
+                    });
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function highlightCells(maxRow, maxCol) {
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                const r = parseInt(cell.dataset.row, 10);
+                const c = parseInt(cell.dataset.col, 10);
+                cell.classList.toggle('active', r <= maxRow && c <= maxCol);
+            });
+        }
+
+        let matrixCounter = 0;
+
+        function insertMatrix(rows, cols) {
+            const editor = document.getElementById('al-visual-editor');
+            const placeholder = document.getElementById('al-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'matrix-wrapper';
+            wrapper.id = `matrix-${matrixCounter++}`;
+
+            const controls = document.createElement('div');
+            controls.className = 'matrix-controls';
+            controls.innerHTML = '<button class="matrix-btn-action" onclick="this.closest(\'.matrix-wrapper\').remove()" title="Eliminar matriz">🗑️</button>';
+
+            const brackets = document.createElement('div');
+            brackets.className = 'matrix-brackets';
+            brackets.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            brackets.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            brackets.dataset.rows = rows;
+            brackets.dataset.cols = cols;
+
+            for (let i = 0; i < rows * cols; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'matrix-cell-input';
+                input.dataset.index = i;
+                input.addEventListener('keydown', (e) => handleMatrixNav(e, input, rows, cols));
+                brackets.appendChild(input);
+            }
+
+            wrapper.appendChild(controls);
+            wrapper.appendChild(brackets);
+            wrapper.addEventListener('click', () => {
+                document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
+                wrapper.classList.add('selected');
+            });
+            editor.appendChild(wrapper);
+            brackets.querySelector('input').focus();
+        }
+
+        function addMatrixOperator(op) {
+            const editor = document.getElementById('al-visual-editor');
+            const placeholder = document.getElementById('al-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const span = document.createElement('span');
+            span.className = 'al-visual-operator';
+            span.textContent = op;
+            span.onclick = () => span.remove();
+            editor.appendChild(span);
+        }
+
+        function addScalar() {
+            const editor = document.getElementById('al-visual-editor');
+            const placeholder = document.getElementById('al-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'scalar-wrapper';
+            wrapper.innerHTML = `
+                <div class="matrix-controls" style="top: -25px;">
+                    <button class="matrix-btn-action" onclick="this.closest('.scalar-wrapper').remove()" title="Eliminar escalar">🗑️</button>
+                </div>
+                <input type="number" class="scalar-input" placeholder="n">
+            `;
+            wrapper.addEventListener('click', () => {
+                document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
+                wrapper.classList.add('selected');
+            });
+            editor.appendChild(wrapper);
+            wrapper.querySelector('input').focus();
+        }
+
+        function handleMatrixNav(event, currentInput, rows, cols) {
+            const currentIdx = Number(currentInput.dataset.index);
+            const container = currentInput.closest('.matrix-brackets');
+            const inputs = container.querySelectorAll('.matrix-cell-input');
+            let nextIdx = null;
+
+            if (event.key === 'ArrowRight') nextIdx = currentIdx + 1;
+            if (event.key === 'ArrowLeft') nextIdx = currentIdx - 1;
+            if (event.key === 'ArrowDown') nextIdx = currentIdx + cols;
+            if (event.key === 'ArrowUp') nextIdx = currentIdx - cols;
+
+            if (nextIdx !== null && nextIdx >= 0 && nextIdx < inputs.length) {
+                event.preventDefault();
+                inputs[nextIdx].focus();
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('matrix-popup');
+            if (popup && popup.style.display === 'block' && !popup.contains(e.target) && !e.target.closest('.al-custom-size-wrapper')) {
+                popup.style.display = 'none';
+            }
+            if (!e.target.closest('.matrix-wrapper') && !e.target.closest('.scalar-wrapper') && !e.target.closest('.al-editor-actions')) {
+                document.querySelectorAll('.matrix-wrapper, .scalar-wrapper').forEach(el => el.classList.remove('selected'));
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Delete' || e.key === 'Backspace')) {
+                const selected = document.querySelector('.matrix-wrapper.selected, .scalar-wrapper.selected');
+                if (selected && document.activeElement.tagName !== 'INPUT') {
+                    selected.remove();
+                    const editor = document.getElementById('al-visual-editor');
+                    if (editor && editor.children.length === 0) {
+                        editor.innerHTML = '<div id="al-placeholder" style="color: #999; font-style: italic;">Selecciona un tamaño arriba para comenzar...</div>';
+                    }
+                }
+            }
+        });
+
+        function solveLinearAlgebra() {
+            const editor = document.getElementById('al-visual-editor');
+            const results = document.getElementById('al-results-body');
+            if (!editor || !results) return;
+            const matrices = [];
+            const scalarEls = [];
+
+            for (const child of editor.children) {
+                if (child.classList && child.classList.contains('matrix-wrapper')) {
+                    const brackets = child.querySelector('.matrix-brackets');
+                    if (!brackets) continue;
+                    const rows = Number(brackets.dataset.rows || 1);
+                    const cols = Number(brackets.dataset.cols || 1);
+                    const values = Array.from(brackets.querySelectorAll('input')).map(input => Number(input.value || 0));
+                    if (values.some(v => Number.isNaN(v))) {
+                        results.innerHTML = "<p style='color:red;'>⚠️ Ingresa solo números válidos en la matriz.</p>";
+                        return;
+                    }
+                    const matrix = [];
+                    for (let i = 0; i < rows; i++) {
+                        matrix.push(values.slice(i * cols, i * cols + cols));
+                    }
+                    matrices.push(matrix);
+                } else if (child.classList && child.classList.contains('scalar-wrapper')) {
+                    const input = child.querySelector('input');
+                    if (input && input.value !== '') scalarEls.push(Number(input.value));
+                }
+            }
+
+            if (!matrices.length) {
+                results.innerHTML = "<p style='color:#666; font-style:italic;'>Ingresa una matriz para calcular sus propiedades.</p>";
+                return;
+            }
+
+            const A = matrices[0];
+            const rows = A.length;
+            const cols = A[0].length;
+            const determinant = calcDeterminant(A);
+            const rank = calcRank(A);
+            const transposed = transpose(A);
+            const frob = Math.sqrt(A.flat().reduce((sum, value) => sum + value * value, 0));
+            let html = '<h5>Matriz Original A</h5><pre>' + formatMatrix(A) + '</pre><hr>';
+            html += '<div class="grid-x grid-margin-x"><div class="cell medium-6">';
+            html += '<p><strong>Transpuesta Aᵀ</strong><br><pre>' + formatMatrix(transposed) + '</pre></p>';
+            html += '<p><strong>Rango:</strong> ' + rank + '</p>';
+            html += '<p><strong>Norma Frobenius:</strong> ' + frob.toFixed(4) + '</p>';
+            if (scalarEls.length) {
+                const scalar = scalarEls[0];
+                html += '<p><strong>Producto por escalar (' + scalar + ' × A)</strong><br><pre>' + formatMatrix(A.map(row => row.map(v => v * scalar))) + '</pre></p>';
+            }
+            html += '</div><div class="cell medium-6">';
+            if (rows === cols) {
+                html += '<p><strong>Traza:</strong> ' + traceMatrix(A).toFixed(4) + '</p>';
+                html += '<p><strong>Determinante:</strong> ' + determinant.toFixed(4) + '</p>';
+                if (Math.abs(determinant) > 1e-10) {
+                    html += '<p><strong>Inversa A⁻¹</strong><br><pre>' + formatMatrix(inverseMatrix(A)) + '</pre></p>';
+                } else {
+                    html += '<p><strong>Inversa:</strong> Matrix singular (determinante = 0).</p>';
+                }
+                const eig = eigenvalues(A);
+                html += '<p><strong>Eigenvalores:</strong> ' + eig.map(v => v.toFixed(4)).join(', ') + '</p>';
+            } else {
+                html += '<div class="callout warning"><em>La matriz no es cuadrada. La traza, el determinante y la inversa no aplican.</em></div>';
+            }
+            html += '</div></div>';
+            results.innerHTML = html;
+        }
+
+        function solveVectors() {
+            const uText = document.getElementById('vec-u').value;
+            const vText = document.getElementById('vec-v').value;
+            const u = parseVector(uText);
+            const v = parseVector(vText);
+            const result = document.getElementById('vec-result');
+            if (!u || !v) {
+                result.innerHTML = '<p style="color:red;">Ingresa dos vectores válidos.</p>';
+                return;
+            }
+            const dot = u.reduce((sum, val, idx) => sum + val * v[idx], 0);
+            const normU = Math.sqrt(u.reduce((sum, val) => sum + val * val, 0));
+            const normV = Math.sqrt(v.reduce((sum, val) => sum + val * val, 0));
+            const cos = dot / (normU * normV || 1);
+            result.innerHTML = `
+                <p><strong>u + v:</strong> ${formatVector(u.map((val, idx) => val + v[idx]))}</p>
+                <p><strong>u · v:</strong> ${dot.toFixed(4)}</p>
+                <p><strong>||u||:</strong> ${normU.toFixed(4)}</p>
+                <p><strong>||v||:</strong> ${normV.toFixed(4)}</p>
+                <p><strong>cosθ:</strong> ${cos.toFixed(4)}</p>
+            `;
+        }
+
+        function parseVector(str) {
+            if (!str) return null;
+            const values = str.split(',').map(v => Number(v.trim())).filter(v => !Number.isNaN(v));
+            return values.length ? values : null;
+        }
+
+        function formatVector(values) {
+            return `[${values.map(v => Number(v).toFixed(4)).join(', ')}]`;
+        }
+
+        function formatMatrix(matrix) {
+            return matrix.map(row => `[ ${row.map(v => Number(v).toFixed(4)).join('  ')} ]`).join('\n');
+        }
+
+        function transpose(matrix) {
+            return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+        }
+
+        function traceMatrix(matrix) {
+            return matrix.reduce((sum, row, idx) => sum + row[idx], 0);
+        }
+
+        function calcRank(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            let copy = matrix.map(row => [...row]);
+            let rank = 0;
+            let pivotRow = 0;
+            let pivotCol = 0;
+            while (pivotRow < rows && pivotCol < cols) {
+                let maxRow = pivotRow;
+                for (let r = pivotRow + 1; r < rows; r++) {
+                    if (Math.abs(copy[r][pivotCol]) > Math.abs(copy[maxRow][pivotCol])) maxRow = r;
+                }
+                if (Math.abs(copy[maxRow][pivotCol]) <= 1e-10) {
+                    pivotCol++;
+                    continue;
+                }
+                [copy[pivotRow], copy[maxRow]] = [copy[maxRow], copy[pivotRow]];
+                const pivot = copy[pivotRow][pivotCol];
+                for (let c = pivotCol; c < cols; c++) copy[pivotRow][c] /= pivot;
+                for (let r = 0; r < rows; r++) {
+                    if (r !== pivotRow) {
+                        const factor = copy[r][pivotCol];
+                        for (let c = pivotCol; c < cols; c++) copy[r][c] -= factor * copy[pivotRow][c];
+                    }
+                }
+                rank++;
+                pivotRow++;
+                pivotCol++;
+            }
+            return rank;
+        }
+
+        function calcDeterminant(matrix) {
+            const n = matrix.length;
+            if (n === 0) return 0;
+            if (n === 1) return matrix[0][0];
+            if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+
+            let det = 0;
+            for (let col = 0; col < n; col++) {
+                const minor = matrix.slice(1).map(row => row.filter((_, idx) => idx !== col));
+                det += ((col % 2 === 0 ? 1 : -1) * matrix[0][col] * calcDeterminant(minor));
+            }
+            return det;
+        }
+
+        function inverseMatrix(matrix) {
+            const n = matrix.length;
+            const det = calcDeterminant(matrix);
+            if (Math.abs(det) < 1e-10) return matrix.map(row => row.map(() => 0));
+            const adj = [];
+            for (let i = 0; i < n; i++) {
+                const row = [];
+                for (let j = 0; j < n; j++) {
+                    const minor = [];
+                    for (let r = 0; r < n; r++) {
+                        if (r === i) continue;
+                        const newRow = [];
+                        for (let c = 0; c < n; c++) {
+                            if (c === j) continue;
+                            newRow.push(matrix[r][c]);
+                        }
+                        if (newRow.length) minor.push(newRow);
+                    }
+                    const cofactor = (((i + j) % 2 === 0 ? 1 : -1) * calcDeterminant(minor)) / det;
+                    row.push(cofactor);
+                }
+                adj.push(row);
+            }
+            return transpose(adj);
+        }
+
+        function eigenvalues(matrix) {
+            const n = matrix.length;
+            if (n === 1) return [matrix[0][0]];
+            const vals = [];
+            const poly = characteristicPolynomial(matrix);
+            const roots = findRoots(poly);
+            roots.forEach(v => vals.push(v));
+            return vals;
+        }
+
+        function characteristicPolynomial(matrix) {
+            const n = matrix.length;
+            const p = [1];
+            for (let k = 1; k <= n; k++) {
+                p.push(0);
+            }
+            for (let i = 0; i < n; i++) {
+                const x = matrix[i][i];
+                p[i + 1] = -x;
+            }
+            return p;
+        }
+
+        function findRoots(poly) {
+            const coeffs = poly.slice();
+            const roots = [];
+            for (let lambda = -10; lambda <= 10; lambda += 0.1) {
+                let value = 0;
+                for (let i = 0; i < coeffs.length; i++) {
+                    value += coeffs[i] * Math.pow(lambda, coeffs.length - 1 - i);
+                }
+                if (Math.abs(value) < 0.05) roots.push(lambda);
+            }
+            return roots.length ? roots : [0];
+        }
+
+        function cambiarDimensionSistema() {
+            const dim = document.getElementById('sys-dimension').value;
+            const container = document.getElementById('sys-inputs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (dim === '2') {
+                container.innerHTML = `
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Ecuación 1: A₁x + B₁y = C₁</p>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 8px;">
+                        <input type="number" id="s2-a1" value="1" style="width: 50px; text-align: center;" placeholder="A1"> x +
+                        <input type="number" id="s2-b1" value="1" style="width: 50px; text-align: center;" placeholder="B1"> y =
+                        <input type="number" id="s2-c1" value="5" style="width: 60px; text-align: center;" placeholder="C1">
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px; margin-top: 15px;">Ecuación 2: A₂x + B₂y = C₂</p>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 8px;">
+                        <input type="number" id="s2-a2" value="2" style="width: 50px; text-align: center;" placeholder="A2"> x +
+                        <input type="number" id="s2-b2" value="-1" style="width: 50px; text-align: center;" placeholder="B2"> y =
+                        <input type="number" id="s2-c2" value="4" style="width: 60px; text-align: center;" placeholder="C2">
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">Sistema 3x3 (Ax + By + Cz = D)</p>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                        <input type="number" id="s3-a1" value="1" style="width: 40px;" placeholder="A1">x+<input type="number" id="s3-b1" value="1" style="width: 40px;" placeholder="B1">y+<input type="number" id="s3-c1" value="1" style="width: 40px;" placeholder="C1">z=<input type="number" id="s3-d1" value="6" style="width: 50px;" placeholder="D1">
+                    </div>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                        <input type="number" id="s3-a2" value="2" style="width: 40px;" placeholder="A2">x+<input type="number" id="s3-b2" value="-1" style="width: 40px;" placeholder="B2">y+<input type="number" id="s3-c2" value="1" style="width: 40px;" placeholder="C2">z=<input type="number" id="s3-d2" value="3" style="width: 50px;" placeholder="D2">
+                    </div>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px;">
+                        <input type="number" id="s3-a3" value="1" style="width: 40px;" placeholder="A3">x+<input type="number" id="s3-b3" value="2" style="width: 40px;" placeholder="B3">y+<input type="number" id="s3-c3" value="-1" style="width: 40px;" placeholder="C3">z=<input type="number" id="s3-d3" value="2" style="width: 50px;" placeholder="D3">
+                    </div>
+                `;
+            }
+        }
+
+        function solveSystem() {
+            const errorBox = document.getElementById('sys-error');
+            const resultBox = document.getElementById('sys-result-body');
+            const dim = Number(document.getElementById('sys-dimension').value);
+            const A = [];
+            const b = [];
+
+            if (dim === 2) {
+                const values = [
+                    Number(document.getElementById('s2-a1').value),
+                    Number(document.getElementById('s2-b1').value),
+                    Number(document.getElementById('s2-c1').value),
+                    Number(document.getElementById('s2-a2').value),
+                    Number(document.getElementById('s2-b2').value),
+                    Number(document.getElementById('s2-c2').value)
+                ];
+                A.push([values[0], values[1]]);
+                A.push([values[3], values[4]]);
+                b.push(values[2]);
+                b.push(values[5]);
+            } else {
+                A.push([
+                    Number(document.getElementById('s3-a1').value),
+                    Number(document.getElementById('s3-b1').value),
+                    Number(document.getElementById('s3-c1').value)
+                ]);
+                A.push([
+                    Number(document.getElementById('s3-a2').value),
+                    Number(document.getElementById('s3-b2').value),
+                    Number(document.getElementById('s3-c2').value)
+                ]);
+                A.push([
+                    Number(document.getElementById('s3-a3').value),
+                    Number(document.getElementById('s3-b3').value),
+                    Number(document.getElementById('s3-c3').value)
+                ]);
+                b.push(Number(document.getElementById('s3-d1').value));
+                b.push(Number(document.getElementById('s3-d2').value));
+                b.push(Number(document.getElementById('s3-d3').value));
+            }
+
+            const det = calcDeterminant(A);
+            if (Math.abs(det) < 1e-10) {
+                resultBox.innerHTML = '<p style="color:red;">El sistema no tiene solución única.</p>';
+                if (errorBox) errorBox.innerHTML = '⚠️ Determinante casi nulo.';
+                return;
+            }
+
+            const solution = solveLinearSystem(A, b);
+            const names = ['x', 'y', 'z'];
+            let html = '<ul style="list-style-type:none; padding-left:0;">';
+            for (let i = 0; i < solution.length; i++) {
+                html += `<li><strong>${names[i]}</strong> = ${solution[i].toFixed(4)}</li>`;
+            }
+            html += '</ul>';
+            resultBox.innerHTML = html;
+            if (errorBox) errorBox.innerHTML = '';
+
+            if (dim === 2) {
+                drawSystem2D(A, b, solution);
+            }
+        }
+
+        function solveLinearSystem(A, b) {
+            const n = A.length;
+            const M = A.map((row, i) => [...row, b[i]]);
+            for (let i = 0; i < n; i++) {
+                let pivot = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (Math.abs(M[j][i]) > Math.abs(M[pivot][i])) pivot = j;
+                }
+                [M[i], M[pivot]] = [M[pivot], M[i]];
+                const val = M[i][i] || 1e-12;
+                for (let j = i; j <= n; j++) M[i][j] /= val;
+                for (let r = 0; r < n; r++) {
+                    if (r !== i) {
+                        const factor = M[r][i];
+                        for (let j = i; j <= n; j++) M[r][j] -= factor * M[i][j];
+                    }
+                }
+            }
+            return M.map(row => row[n]);
+        }
+
+        function drawSystem2D(A, b, solution) {
+            const container = document.getElementById('sys-graph-container');
+            if (!container || !window.Plotly) return;
+            const traces = [];
+            const xVals = Array.from({ length: 121 }, (_, i) => -15 + i * 0.25);
+            const colors = ['#2563eb', '#e83e8c'];
+            for (let i = 0; i < 2; i++) {
+                if (Math.abs(A[i][1]) > 1e-9) {
+                    const yVals = xVals.map(x => (b[i] - A[i][0] * x) / A[i][1]);
+                    traces.push({ x: xVals, y: yVals, type: 'scatter', mode: 'lines', name: `Ecuación ${i + 1}`, line: { color: colors[i] } });
+                } else {
+                    const xConst = b[i] / A[i][0];
+                    traces.push({ x: [xConst, xConst], y: [-15, 15], type: 'scatter', mode: 'lines', name: `Ecuación ${i + 1} vertical`, line: { color: colors[i] } });
+                }
+            }
+            if (solution) {
+                traces.push({ x: [solution[0]], y: [solution[1]], type: 'scatter', mode: 'markers', name: 'Solución', marker: { color: '#4CAF50', size: 12 } });
+            }
+            const layout = {
+                title: 'Representación del Sistema 2x2',
+                xaxis: { title: 'Eje X', zeroline: true },
+                yaxis: { title: 'Eje Y', zeroline: true },
+                margin: { t: 40, b: 40, l: 50, r: 20 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            Plotly.newPlot(container, traces, layout, { responsive: true });
+        }
+
+        function generateRandomMatrix() {
+            const output = document.getElementById('random-matrix-output');
+            if (!output) return;
+            const n = 3;
+            const matrix = Array.from({ length: n }, () => Array.from({ length: n }, () => +(Math.random() * 10).toFixed(2)));
+            output.innerHTML = '<pre>' + formatMatrix(matrix) + '</pre>';
+        }
+    </script>
+</body>
+</html>
