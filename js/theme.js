@@ -32,9 +32,7 @@ function applyTheme(theme){
 
     );
 
-    if(theme!="light")
-
-        body.classList.add(theme);
+    body.classList.add(theme === "light" ? "light" : theme);
 
     selector.value=theme;
 

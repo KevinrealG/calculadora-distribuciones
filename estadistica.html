@@ -15,35 +15,68 @@
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/themes/pinkmode.css">
     <style>
-        body { background: #0f172a; color: #e5e7eb; font-family: Arial, sans-serif; }
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --panel: #eef2ff;
+            --text: #0f172a;
+            --muted: #475569;
+            --border: rgba(15, 23, 42, 0.18);
+            --chip-bg: rgba(15, 23, 42, 0.04);
+            --input-bg: #ffffff;
+            --input-text: #0f172a;
+            --button-primary: #2563eb;
+            --button-primary-text: #ffffff;
+            --button-secondary: #e5e7eb;
+            --button-secondary-text: #111827;
+        }
+
+        body.light { --bg: #f8fafc; --surface: #ffffff; --panel: #eef2ff; --text: #0f172a; --muted: #475569; --border: rgba(15, 23, 42, 0.18); --chip-bg: rgba(15, 23, 42, 0.04); --input-bg: #ffffff; --input-text: #0f172a; --button-primary: #2563eb; --button-primary-text: #ffffff; --button-secondary: #e5e7eb; --button-secondary-text: #111827; }
+        body.dark { --bg: #0f172a; --surface: #111827; --panel: #1f2937; --text: #f8fafc; --muted: #cbd5e1; --border: rgba(148,163,184,0.28); --chip-bg: rgba(255,255,255,0.08); --input-bg: #1f2937; --input-text: #f8fafc; --button-primary: #3b82f6; --button-primary-text: #ffffff; --button-secondary: #374151; --button-secondary-text: #f8fafc; }
+        body.pink { --bg: #fff1f7; --surface: #ffffff; --panel: #ffe4f1; --text: #4a044e; --muted: #9d174d; --border: rgba(236, 72, 153, 0.25); --chip-bg: rgba(236,72,153,0.08); --input-bg: #ffffff; --input-text: #4a044e; --button-primary: #ec4899; --button-primary-text: #ffffff; --button-secondary: #fce7f3; --button-secondary-text: #4a044e; }
+
+        body {
+            background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
+        }
         .page-shell { max-width: 1400px; margin: 0 auto; padding: 24px 20px 40px; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .topbar h2 { margin: 0; color: #fff; }
-        .chip { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; }
+        .topbar h2 { margin: 0; color: var(--text); }
+        .chip { display: inline-block; background: var(--chip-bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+        .theme-selector { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
         .desc-sub-view { display: none; }
         .desc-sub-view.active { display: block; }
-        .sidebar { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 12px; padding: 16px; }
-        .card { background: rgba(15, 23, 42, 0.84); border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.22); }
-        .card-divider { background: rgba(30, 41, 59, 0.95); color: white; }
-        textarea, input, select { background: rgba(255,255,255,0.03); color: white; border: 1px solid rgba(148,163,184,0.35); }
+        .sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); color: var(--text); }
+        .card-divider { background: var(--panel); color: var(--text); }
+        textarea, input, select { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border); }
         .button { border-radius: 8px; }
+        .button.success { background: var(--button-primary); color: var(--button-primary-text); }
+        .button.secondary { background: var(--button-secondary); color: var(--button-secondary-text); }
         .dynamic-input-table { width: 100%; }
         .dynamic-input-table td { padding: 6px; }
-        .callout.alert { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4); color: #fff; }
+        .callout.alert { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4); color: var(--text); }
         #desc-error-container, #cualf-error-container, #cont-error, #biv-error { min-height: 24px; }
+        table, th, td, p, li, label, h1, h2, h3, h4, h5 { color: var(--text); }
         @media (max-width: 768px) { .topbar { flex-direction: column; align-items: flex-start; gap: 12px; } }
     </style>
 </head>
-<body>
+<body class="light">
     <div class="page-shell">
         <div class="topbar">
             <h2>Estadística Descriptiva</h2>
-            <span class="chip">Calculadora independiente</span>
+            <div style="display:flex; align-items:center; gap: 12px;">
+                <select id="theme-selector" class="theme-selector">
+                    <option value="light">☀️ Light</option>
+                    <option value="dark">🌙 Dark</option>
+                    <option value="pink">🩷 Pink</option>
+                </select>
+                <span class="chip">Calculadora independiente</span>
+            </div>
         </div>
 
         <div class="grid-x grid-margin-x" style="margin-bottom: 20px;">
             <div class="cell small-12 medium-6 large-4">
-                <label for="desc-view-selector" style="font-weight: bold; color: white;">Selecciona el tipo de análisis:</label>
+                <label for="desc-view-selector" style="font-weight: bold; color: var(--text);">Selecciona el tipo de análisis:</label>
                 <select id="desc-view-selector" style="border-radius: 5px;">
                     <option value="sub-univariado">📈 Datos en numérico univariado</option>
                     <option value="sub-agrupados">📊 Datos numérico Agrupados</option>
@@ -300,6 +333,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="js/theme.js"></script>
     <script>
         const mathJaxReady = () => !!(window.MathJax && window.MathJax.typesetPromise);
         document.addEventListener('DOMContentLoaded', function () {

@@ -15,55 +15,83 @@
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/themes/pinkmode.css">
     <style>
-        body { background: #0f172a; color: #e5e7eb; font-family: Arial, sans-serif; }
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --panel: #eef2ff;
+            --panel-strong: #e2e8f0;
+            --text: #0f172a;
+            --muted: #475569;
+            --border: rgba(15, 23, 42, 0.18);
+            --chip-bg: rgba(15, 23, 42, 0.04);
+            --input-bg: #ffffff;
+            --input-text: #0f172a;
+            --button-primary: #2563eb;
+            --button-primary-text: #ffffff;
+            --button-secondary: #e5e7eb;
+            --button-secondary-text: #111827;
+            --shadow: rgba(15,23,42,0.12);
+        }
+
+        body.light { --bg: #f8fafc; --surface: #ffffff; --panel: #eef2ff; --panel-strong: #e2e8f0; --text: #0f172a; --muted: #475569; --border: rgba(15, 23, 42, 0.18); --chip-bg: rgba(15, 23, 42, 0.04); --input-bg: #ffffff; --input-text: #0f172a; --button-primary: #2563eb; --button-primary-text: #ffffff; --button-secondary: #e5e7eb; --button-secondary-text: #111827; --shadow: rgba(15,23,42,0.12); }
+        body.dark { --bg: #0f172a; --surface: #111827; --panel: #1f2937; --panel-strong: #374151; --text: #f8fafc; --muted: #cbd5e1; --border: rgba(148,163,184,0.28); --chip-bg: rgba(255,255,255,0.08); --input-bg: #1f2937; --input-text: #f8fafc; --button-primary: #3b82f6; --button-primary-text: #ffffff; --button-secondary: #374151; --button-secondary-text: #f8fafc; --shadow: rgba(0,0,0,0.25); }
+        body.pink { --bg: #fff1f7; --surface: #ffffff; --panel: #ffe4f1; --panel-strong: #fbcfe8; --text: #4a044e; --muted: #9d174d; --border: rgba(236, 72, 153, 0.25); --chip-bg: rgba(236,72,153,0.08); --input-bg: #ffffff; --input-text: #4a044e; --button-primary: #ec4899; --button-primary-text: #ffffff; --button-secondary: #fce7f3; --button-secondary-text: #4a044e; --shadow: rgba(236,72,153,0.18); }
+
+        body {
+            background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
+        }
         .page-shell { max-width: 1400px; margin: 0 auto; padding: 24px 20px 40px; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .topbar h2 { margin: 0; color: #fff; }
-        .chip { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; }
+        .topbar h2 { margin: 0; color: var(--text); }
+        .chip { display: inline-block; background: var(--chip-bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+        .theme-selector { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
         .al-sub-view { display: none; }
         .al-sub-view.active { display: block; }
         .al-card {
-            background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px var(--shadow); color: var(--text);
         }
         .al-size-selector { margin-bottom: 18px; }
-        .al-editor-container { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 16px; }
+        .al-editor-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
         .al-visual-editor {
-            min-height: 220px; border: 1px dashed rgba(148,163,184,.4); border-radius: 12px; padding: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: rgba(255,255,255,0.02);
+            min-height: 220px; border: 1px dashed var(--border); border-radius: 12px; padding: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: rgba(148,163,184,0.04);
         }
         .matrix-wrapper, .scalar-wrapper {
             position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 12px 10px 10px; border: 1px solid rgba(59,130,246,.35); border-radius: 10px; background: rgba(59,130,246,.08); min-width: 100px; cursor: pointer;
         }
         .matrix-wrapper.selected, .scalar-wrapper.selected { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.22); }
         .matrix-brackets {
-            display: grid; gap: 6px; padding: 6px; border-radius: 8px; border: 1px solid rgba(148,163,184,.3); background: rgba(255,255,255,.02);
+            display: grid; gap: 6px; padding: 6px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.02);
         }
         .matrix-cell-input, .scalar-input {
-            width: 52px; height: 32px; border-radius: 6px; border: 1px solid rgba(148,163,184,.35); background: rgba(255,255,255,.04); color: #fff; text-align: center;
+            width: 52px; height: 32px; border-radius: 6px; border: 1px solid var(--border); background: var(--input-bg); color: var(--input-text); text-align: center;
         }
         .matrix-controls { position: absolute; top: -10px; right: -10px; }
         .matrix-btn-action { background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
-        .al-visual-operator { font-size: 2rem; font-weight: bold; color: #f8fafc; }
+        .al-visual-operator { font-size: 2rem; font-weight: bold; color: var(--text); }
         .al-editor-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
         .al-solve-btn {
-            margin-left: auto; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; cursor: pointer;
+            margin-left: auto; background: linear-gradient(135deg, var(--button-primary), #1d4ed8); color: var(--button-primary-text); border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; cursor: pointer;
         }
-        .al-results-header { border-bottom: 1px solid rgba(148,163,184,.2); padding-bottom: 8px; margin-bottom: 10px; }
+        .al-results-header { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; }
         .al-matrix-popup {
-            position: absolute; top: 48px; left: 0; z-index: 5; width: 260px; background: #111827; border: 1px solid rgba(148,163,184,.25); border-radius: 10px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.25);
+            position: absolute; top: 48px; left: 0; z-index: 5; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 10px 25px var(--shadow); color: var(--text);
         }
         .al-popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .al-close-btn { background: transparent; border: none; color: #fff; cursor: pointer; }
+        .al-close-btn { background: transparent; border: none; color: var(--text); cursor: pointer; }
         .al-matrix-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
-        .matrix-cell { width: 14px; height: 14px; border-radius: 3px; background: rgba(148,163,184,.14); border: 1px solid rgba(148,163,184,.2); }
+        .matrix-cell { width: 14px; height: 14px; border-radius: 3px; background: rgba(148,163,184,.14); border: 1px solid var(--border); }
         .matrix-cell.active { background: #3b82f6; }
         .sto { color: #67e8f9; }
-        .sidebar-panel { background: rgba(15,23,42,.85); border: 1px solid rgba(148,163,184,.25); border-radius: 12px; padding: 16px; }
+        .sidebar-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
         .table-inputs { width: 100%; }
         .table-inputs input { width: 100%; }
-        .desc-sub-view .card { background: rgba(15,23,42,.8); }
+        .desc-sub-view .card { background: var(--surface); }
         .tab-pane { display: none; }
         .tab-pane.is-active { display: block; }
         .matrix-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .button { border-radius: 8px; }
+        .button.secondary { background: var(--button-secondary); color: var(--button-secondary-text); }
+        label, p, li, td, th, span, h4, h5, h3 { color: var(--text); }
         @media (max-width: 768px) {
             .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
             .al-editor-actions { align-items: stretch; }
@@ -71,16 +99,23 @@
         }
     </style>
 </head>
-<body>
+<body class="light">
     <div class="page-shell">
         <div class="topbar">
             <h2>Álgebra Lineal</h2>
-            <span class="chip">Calculadora independiente</span>
+            <div style="display:flex; align-items:center; gap: 12px;">
+                <select id="theme-selector" class="theme-selector">
+                    <option value="light">☀️ Light</option>
+                    <option value="dark">🌙 Dark</option>
+                    <option value="pink">🩷 Pink</option>
+                </select>
+                <span class="chip">Calculadora independiente</span>
+            </div>
         </div>
 
         <div class="grid-x grid-margin-x" style="margin-bottom: 20px;">
             <div class="cell small-12 medium-6 large-4">
-                <label for="al-view-selector" style="font-weight: bold; color: white;">Selecciona el tipo de análisis:</label>
+                <label for="al-view-selector" style="font-weight: bold; color: var(--text);">Selecciona el tipo de análisis:</label>
                 <select id="al-view-selector" style="border-radius: 5px;">
                     <option value="al-sub-matrices">📐 Matrices</option>
                     <option value="al-sub-vectores">📏 Vectores</option>
@@ -162,8 +197,8 @@
             <div id="al-sub-sistemas" class="al-sub-view">
                 <div class="grid-x grid-margin-x">
                     <aside class="cell small-12 medium-5 large-4 sidebar-panel">
-                        <div class="card" style="box-shadow: none; background: transparent; border: none; color: white;">
-                            <div class="card-divider" style="background: #2563eb; color: white; border-radius: 8px 8px 0 0;">Configuración del Sistema</div>
+                        <div class="card" style="box-shadow: none; background: transparent; border: none; color: var(--text);">
+                            <div class="card-divider" style="background: #2563eb; color: #ffffff; border-radius: 8px 8px 0 0;">Configuración del Sistema</div>
                             <div class="card-section">
                                 <label for="sys-dimension" style="font-weight: bold; margin-bottom: 5px;">Dimensión del Sistema:</label>
                                 <select id="sys-dimension" class="theme-selector" style="width: 100%; margin-bottom: 15px;" onchange="cambiarDimensionSistema()">
@@ -263,6 +298,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="js/theme.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const selector = document.getElementById('al-view-selector');
