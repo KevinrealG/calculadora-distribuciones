@@ -411,7 +411,12 @@
             span.className = 'al-visual-operator';
             span.textContent = op;
             span.onclick = () => span.remove();
-            editor.appendChild(span);
+            const selected = editor.querySelector('.matrix-wrapper.selected, .scalar-wrapper.selected');
+            if (selected) {
+                selected.after(span);
+            } else {
+                editor.appendChild(span);
+            }
         }
 
         function addScalar() {
@@ -480,7 +485,7 @@
             const results = document.getElementById('al-results-body');
             if (!editor || !results) return;
             const matrices = [];
-            const scalarEls = [];
+            const expression = [];
 
             for (const child of editor.children) {
                 if (child.classList && child.classList.contains('matrix-wrapper')) {
@@ -498,9 +503,14 @@
                         matrix.push(values.slice(i * cols, i * cols + cols));
                     }
                     matrices.push(matrix);
+                    expression.push({ type: 'matrix', value: matrix });
+                } else if (child.classList && child.classList.contains('al-visual-operator')) {
+                    expression.push({ type: 'operator', value: child.textContent.trim() });
                 } else if (child.classList && child.classList.contains('scalar-wrapper')) {
                     const input = child.querySelector('input');
-                    if (input && input.value !== '') scalarEls.push(Number(input.value));
+                    if (input && input.value !== '') {
+                        expression.push({ type: 'scalar', value: Number(input.value) });
+                    }
                 }
             }
 
@@ -512,19 +522,23 @@
             const A = matrices[0];
             const rows = A.length;
             const cols = A[0].length;
+            const operation = evaluateMatrixExpression(expression);
+            if (!operation.valid) {
+                results.innerHTML = `<p style='color:red;'>⚠️ ${operation.error}</p>`;
+                return;
+            }
             const determinant = calcDeterminant(A);
             const rank = calcRank(A);
             const transposed = transpose(A);
             const frob = Math.sqrt(A.flat().reduce((sum, value) => sum + value * value, 0));
             let html = '<h5>Matriz Original A</h5><pre>' + formatMatrix(A) + '</pre><hr>';
+            if (operation.result && operation.hasOperator) {
+                html += '<h5>Resultado de la operación</h5><pre>' + formatMatrix(operation.result) + '</pre><hr>';
+            }
             html += '<div class="grid-x grid-margin-x"><div class="cell medium-6">';
             html += '<p><strong>Transpuesta Aᵀ</strong><br><pre>' + formatMatrix(transposed) + '</pre></p>';
             html += '<p><strong>Rango:</strong> ' + rank + '</p>';
             html += '<p><strong>Norma Frobenius:</strong> ' + frob.toFixed(4) + '</p>';
-            if (scalarEls.length) {
-                const scalar = scalarEls[0];
-                html += '<p><strong>Producto por escalar (' + scalar + ' × A)</strong><br><pre>' + formatMatrix(A.map(row => row.map(v => v * scalar))) + '</pre></p>';
-            }
             html += '</div><div class="cell medium-6">';
             if (rows === cols) {
                 html += '<p><strong>Traza:</strong> ' + traceMatrix(A).toFixed(4) + '</p>';
@@ -541,6 +555,62 @@
             }
             html += '</div></div>';
             results.innerHTML = html;
+        }
+
+        function evaluateMatrixExpression(expression) {
+            const operators = expression.filter(item => item.type === 'operator');
+            if (!operators.length) return { valid: true, hasOperator: false };
+            if (expression.length < 3 || expression.some((item, index) =>
+                (index % 2 === 0 && item.type === 'operator') ||
+                (index % 2 === 1 && item.type !== 'operator'))) {
+                return { valid: false, error: 'La expresión debe alternar matrices, escalares y operadores.' };
+            }
+
+            let result = expression[0];
+            for (let index = 1; index < expression.length; index += 2) {
+                const operator = expression[index].value;
+                const right = expression[index + 1];
+                if (operator === '+') {
+                    if (result.type !== 'matrix' || right.type !== 'matrix' || !sameShape(result.value, right.value)) {
+                        return { valid: false, error: 'La suma no se puede realizar: las matrices deben tener la misma forma.' };
+                    }
+                    result = { type: 'matrix', value: addMatrices(result.value, right.value) };
+                } else if (operator === '*') {
+                    if (result.type === 'scalar' && right.type === 'matrix') {
+                        result = { type: 'matrix', value: multiplyByScalar(right.value, result.value) };
+                    } else if (result.type === 'matrix' && right.type === 'scalar') {
+                        result = { type: 'matrix', value: multiplyByScalar(result.value, right.value) };
+                    } else if (result.type === 'matrix' && right.type === 'matrix') {
+                        if (result.value[0].length !== right.value.length) {
+                            return { valid: false, error: 'La multiplicación no se puede realizar: el número de columnas de la primera matriz debe ser igual al número de filas de la segunda.' };
+                        }
+                        result = { type: 'matrix', value: multiplyMatrices(result.value, right.value) };
+                    } else {
+                        return { valid: false, error: 'El producto por escalar requiere un escalar y una matriz.' };
+                    }
+                } else {
+                    return { valid: false, error: `La operación "${operator}" no está disponible para matrices.` };
+                }
+            }
+            return { valid: result.type === 'matrix', result: result.value, hasOperator: true };
+        }
+
+        function sameShape(first, second) {
+            return first.length === second.length && first[0].length === second[0].length;
+        }
+
+        function addMatrices(first, second) {
+            return first.map((row, rowIndex) => row.map((value, colIndex) => value + second[rowIndex][colIndex]));
+        }
+
+        function multiplyByScalar(matrix, scalar) {
+            return matrix.map(row => row.map(value => value * scalar));
+        }
+
+        function multiplyMatrices(first, second) {
+            return first.map(row => second[0].map((_, colIndex) =>
+                row.reduce((sum, value, rowIndex) => sum + value * second[rowIndex][colIndex], 0)
+            ));
         }
 
         function solveVectors() {

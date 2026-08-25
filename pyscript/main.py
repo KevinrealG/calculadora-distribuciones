@@ -540,8 +540,19 @@ class Application:
             """
             document.getElementById("uni-stats").innerHTML = html_stats
 
-            k = int(1 + 3.322 * np.log10(n_total)) if n_total > 0 else 1
-            frecuencias, limites = np.histogram(data, bins=k)
+            k = max(1, int(np.ceil(1 + 3.322 * np.log10(n_total))))
+            minimo = float(np.min(data))
+            maximo = float(np.max(data))
+            rango = maximo - minimo
+            ancho = rango / k
+
+            if rango == 0:
+                limites = np.array([minimo, maximo])
+                frecuencias = np.array([n_total])
+            else:
+                limites = minimo + np.arange(k + 1) * ancho
+                limites[-1] = maximo
+                frecuencias, _ = np.histogram(data, bins=limites)
             
             frecuencias_list = frecuencias.tolist()
             limites_list = limites.tolist()
@@ -576,7 +587,11 @@ class Application:
                 "x": data_py,
                 "type": "histogram",
                 "marker": {"color": "#e83e8c"},
-                "xbins": {"size": float(limites_list[1] - limites_list[0])}
+                "xbins": {
+                    "start": float(limites_list[0]),
+                    "end": float(limites_list[-1]),
+                    "size": float(ancho) if ancho > 0 else 1
+                }
             }]
             hist_layout = {
                 **layout_base, 

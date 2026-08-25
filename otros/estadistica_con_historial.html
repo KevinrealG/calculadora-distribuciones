@@ -677,14 +677,14 @@
         function histogram(sorted, bins) {
             const min = Math.min(...sorted);
             const max = Math.max(...sorted);
-            const width = (max - min) / bins || 1;
+            const width = (max - min) / bins;
             const result = [];
             for (let i = 0; i < bins; i++) {
                 const low = min + i * width;
-                const high = i === bins - 1 ? max : min + (i + 1) * width;
+                const high = min + (i + 1) * width;
                 let freq = 0;
                 sorted.forEach(v => {
-                    if (v >= low && v < high || (i === bins - 1 && v === high)) freq++;
+                    if ((v >= low && v < high) || (i === bins - 1 && v === high)) freq++;
                 });
                 result.push({ low, high, freq });
             }
