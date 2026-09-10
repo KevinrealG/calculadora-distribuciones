@@ -183,6 +183,7 @@
             <label for="desc-view-selector" style="font-weight: bold; color: white;">Selecciona el tipo de análisis:</label>
             <select id="desc-view-selector" style="border-radius: 5px;">
                 <option value="sub-univariado">📈 Datos en numérico univariado</option>
+                <option value="sub-analisis-variables">🧠 Cualitativa vs Cuantitativa</option>
                 <option value="sub-agrupados">📊 Datos numérico Agrupados</option>
                 <option value="sub-cualitativos">🎯 Cualitativas (Datos)</option>
                 <option value="sub-cualitativos-freq">📋 Cualitativas (Freq)</option>
@@ -244,7 +245,38 @@
             </div>
         </div>
 
-        <!-- 2. NUMÉRICO AGRUPADOS -->
+        <!-- 2. CUALITATIVA VS CUANTITATIVA -->
+        <div id="sub-analisis-variables" class="desc-sub-view" style="display: none;">
+            <div class="grid-x grid-margin-x">
+                <aside class="cell small-12 medium-4 large-3 sidebar">
+                    <div class="card">
+                        <div class="card-divider">Variable cualitativa + cuantitativa</div>
+                        <div class="card-section">
+                            <label for="variable-analysis-input" style="font-weight: bold; color: var(--text);">Datos de entrada</label>
+                            <textarea id="variable-analysis-input" rows="12" placeholder="Ejemplo:
+ESTADÍSTICA Y PROBABILIDAD	3,4
+ESTADÍSTICA Y PROBABILIDAD	4,3
+ESTADÍSTICA Inferencial	4,3
+ESTADÍSTICA Y PROBABILIDAD	2,3
+ESTADÍSTICA Y PROBABILIDAD	3,5
+ESTADÍSTICA Inferencial	1,8"></textarea>
+                            <small style="display:block; margin-top:8px; color: #64748b;">Formato recomendado: una fila por observación con categoría y nota separadas por tabulador o punto y coma.</small>
+                        </div>
+                    </div>
+                    <button id="calc-variable-classification-btn" class="button expanded success">Analizar</button>
+                </aside>
+                <main class="cell small-12 medium-8 large-9">
+                    <div class="card">
+                        <div class="card-divider">Resultado comparativo</div>
+                        <div class="card-section" id="analisis-variable-result">
+                            <p style="color: #666; font-style: italic;">Aquí aparecerá el boxplot comparativo y el análisis descriptivo por grupo.</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- 3. NUMÉRICO AGRUPADOS -->
         <div id="sub-agrupados" class="desc-sub-view" style="display: none;">
             <div class="grid-x grid-margin-x">
                 <aside class="cell small-12 medium-4 large-3 sidebar">
@@ -603,6 +635,7 @@
     <script>$(document).foundation();</script>
     <script src="js/ui.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/variable_analysis.js"></script>
     <script src="js/tabs.js"></script>
 
     <!-- Script de Navegación y Tabla Dinámica -->
@@ -667,7 +700,33 @@
                     fila.firstElementChild.textContent = index + 1;
                 });
             }
+
+            const classificationButton = document.getElementById('calc-variable-classification-btn');
+            if (classificationButton) {
+                classificationButton.addEventListener('click', clasificarVariableDesdeUI);
+            }
         });
+
+        function clasificarVariableDesdeUI() {
+            const input = document.getElementById('variable-analysis-input');
+            const result = document.getElementById('analisis-variable-result');
+            if (!input || !result) return;
+
+            const texto = input.value.trim();
+            if (!texto) {
+                result.innerHTML = '<p style="color: #dc2626;">Ingresa datos para el análisis comparativo.</p>';
+                return;
+            }
+
+            const dataset = renderizarAnalisisPorGrupo(texto);
+            result.innerHTML = dataset.html;
+
+            if (window.Plotly) {
+                setTimeout(function () {
+                    window.dispatchEvent(new Event('resize'));
+                }, 120);
+            }
+        }
     </script>
 
     <!-- PyScript -->
