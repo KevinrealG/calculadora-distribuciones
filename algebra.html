@@ -91,6 +91,44 @@
         .matrix-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
         .button { border-radius: 8px; }
         .button.secondary { background: var(--button-secondary); color: var(--button-secondary-text); }
+        .vector-panel { display: grid; gap: 16px; }
+        .vector-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .vector-dim-toggle { display: inline-flex; background: rgba(148, 163, 184, 0.12); border: 1px solid var(--border); border-radius: 999px; padding: 4px; }
+        .vector-dim-btn {
+            border: none; background: transparent; color: var(--text); font-weight: 700; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+        }
+        .vector-dim-btn.is-active { background: var(--button-primary); color: var(--button-primary-text); }
+        .vector-content { display: grid; grid-template-columns: minmax(320px, 1.1fr) minmax(300px, 1fr); gap: 18px; }
+        .vector-list { display: grid; gap: 14px; }
+        .vector-card {
+            background: rgba(148, 163, 184, 0.06); border: 1px solid var(--border); border-radius: 12px; padding: 14px; color: var(--text); cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .vector-card.is-selected {
+            border-color: rgba(37, 99, 235, 0.75); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+        }
+        .vector-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .vector-card-header h5 { margin: 0; }
+        .vector-card select, .vector-card input { width: 100%; }
+        .vector-selection-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .vector-action-btn {
+            border: 1px solid rgba(37, 99, 235, 0.35); border-radius: 8px; padding: 7px 10px; background: rgba(37, 99, 235, 0.08); color: var(--text); font-weight: 700; cursor: pointer;
+        }
+        .vector-field-grid { display: grid; gap: 10px; }
+        .vector-coordinate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .vector-coordinate-grid.three-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .vector-field-compact { display: grid; gap: 6px; }
+        .vector-field-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+        .vector-delete-btn {
+            background: transparent; border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+        }
+        .vector-plot-panel {
+            background: rgba(148, 163, 184, 0.05); border: 1px solid var(--border); border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center;
+        }
+        #vector-canvas { width: 100%; height: 320px; display: block; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(148,163,184,0.03)); border-radius: 8px; }
+        .vector-summary {
+            display: grid; gap: 8px; padding-top: 4px; border-top: 1px solid var(--border);
+        }
+        .vector-summary-item { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 10px 12px; }
         label, p, li, td, th, span, h4, h5, h3 { color: var(--text); }
         @media (max-width: 768px) {
             .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -177,20 +215,25 @@
 
             <div id="al-sub-vectores" class="al-sub-view">
                 <div class="al-card">
-                    <h4>Vectores</h4>
-                    <p>Calcula módulo, suma, producto escalar y combinación lineal.</p>
-                    <div class="grid-x grid-margin-x">
-                        <div class="cell small-12 medium-6">
-                            <label>Vector u</label>
-                            <input id="vec-u" type="text" value="1, 2, 3">
+                    <div class="vector-panel">
+                        <div class="vector-toolbar">
+                            <div class="vector-dim-toggle">
+                                <button type="button" class="vector-dim-btn is-active" data-vector-dim="2">R2</button>
+                                <button type="button" class="vector-dim-btn" data-vector-dim="3">R3</button>
+                            </div>
+                            <button type="button" class="button success" id="add-vector-btn">+ Agregar vector</button>
                         </div>
-                        <div class="cell small-12 medium-6">
-                            <label>Vector v</label>
-                            <input id="vec-v" type="text" value="4, -1, 2">
+
+                        <div class="vector-content">
+                            <div class="vector-list" id="vector-list"></div>
+
+                            <div class="vector-plot-panel">
+                                <svg id="vector-canvas" viewBox="0 0 420 320" aria-label="Gráfico de vectores"></svg>
+                            </div>
                         </div>
+
+                        <div id="vector-summary" class="vector-summary"></div>
                     </div>
-                    <button class="button success" onclick="solveVectors()">Calcular</button>
-                    <div id="vec-result" style="margin-top: 16px;"></div>
                 </div>
             </div>
 
@@ -299,6 +342,7 @@
     <script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/vector_operations.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const selector = document.getElementById('al-view-selector');
@@ -311,6 +355,7 @@
             }
 
             initMatrixGrid();
+            initVectorModule();
             cambiarDimensionSistema();
         });
 
@@ -613,27 +658,541 @@
             ));
         }
 
+        const vectorModuleState = { dimension: 2, dragOffsets: [], dragState: null, selectedIndices: [], graphDraftPoint: null };
+
+        function syncVectorCardIndexes() {
+            const cards = Array.from(document.querySelectorAll('.vector-card'));
+            cards.forEach((card, index) => {
+                card.dataset.vectorIndex = String(index);
+                if (!Array.isArray(vectorModuleState.dragOffsets[index])) {
+                    vectorModuleState.dragOffsets[index] = [0, 0, 0];
+                }
+            });
+            vectorModuleState.dragOffsets = vectorModuleState.dragOffsets.slice(0, cards.length);
+            while (vectorModuleState.dragOffsets.length < cards.length) {
+                vectorModuleState.dragOffsets.push([0, 0, 0]);
+            }
+        }
+
+        function applySelectedIndices() {
+            const cards = document.querySelectorAll('.vector-card');
+            cards.forEach(card => {
+                const idx = Number(card.dataset.vectorIndex ?? 0);
+                card.classList.toggle('is-selected', vectorModuleState.selectedIndices.includes(idx));
+            });
+        }
+
+        function selectVectorCard(card) {
+            const index = Number(card.dataset.vectorIndex ?? 0);
+            const current = vectorModuleState.selectedIndices;
+            if (current.includes(index)) {
+                vectorModuleState.selectedIndices = current.filter(item => item !== index);
+            } else {
+                vectorModuleState.selectedIndices = [...current, index].slice(-2);
+            }
+            applySelectedIndices();
+            renderVectorSummary();
+        }
+
+        function initVectorModule() {
+            const list = document.getElementById('vector-list');
+            if (!list) return;
+
+            document.querySelectorAll('.vector-dim-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    vectorModuleState.dimension = Number(button.dataset.vectorDim) || 2;
+                    document.querySelectorAll('.vector-dim-btn').forEach(item => item.classList.toggle('is-active', item === button));
+                    vectorModuleState.selectedIndices = [];
+                    list.innerHTML = '';
+                    addVectorCard();
+                    renderVectorPlot();
+                    renderVectorSummary();
+                });
+            });
+
+            document.getElementById('add-vector-btn')?.addEventListener('click', () => {
+                addVectorCard();
+                renderVectorPlot();
+                renderVectorSummary();
+            });
+
+            list.innerHTML = '';
+            addVectorCard();
+            renderVectorPlot();
+            renderVectorSummary();
+        }
+
+        function addVectorCard(initialState = {}) {
+            const list = document.getElementById('vector-list');
+            if (!list) return;
+
+            const card = document.createElement('div');
+            card.className = 'vector-card';
+            card.dataset.dimension = String(vectorModuleState.dimension);
+            card.dataset.vectorIndex = String(list.children.length);
+            vectorModuleState.dragOffsets[Number(card.dataset.vectorIndex)] = [0, 0, 0];
+
+            const mode = initialState.mode || 'points';
+            const defaultValues = {
+                a: [0, 0, 0],
+                b: [1, 0, 1],
+                point: [1, 2, 0],
+                direction: [1, 0, 0],
+                magnitude: 2,
+                angle: 45
+            };
+
+            const dim = vectorModuleState.dimension;
+            const coordA = Array.isArray(initialState.a) ? initialState.a : defaultValues.a.slice(0, dim).map((value, index) => index === 0 ? 0 : value);
+            const coordB = Array.isArray(initialState.b) ? initialState.b : defaultValues.b.slice(0, dim).map((value, index) => index === 0 ? 1 : value);
+            const coordPoint = Array.isArray(initialState.point) ? initialState.point : defaultValues.point.slice(0, dim).map((value, index) => index === 0 ? 1 : value);
+            const direction = Array.isArray(initialState.direction) ? initialState.direction : defaultValues.direction.slice(0, dim).map((value, index) => index === 0 ? 1 : value);
+            const magnitude = initialState.magnitude ?? defaultValues.magnitude;
+            const angle = initialState.angle ?? defaultValues.angle;
+
+            card.innerHTML = `
+                <div class="vector-card-header">
+                    <h5>Vector ${list.children.length + 1}</h5>
+                    <button type="button" class="vector-delete-btn" aria-label="Eliminar vector">Eliminar</button>
+                </div>
+                <div class="vector-field-grid">
+                    <div class="vector-field-compact">
+                        <label class="vector-field-label">Modo</label>
+                        <select class="vector-mode">
+                            <option value="points" ${mode === 'points' ? 'selected' : ''}>2 puntos</option>
+                            <option value="origin" ${mode === 'origin' ? 'selected' : ''}>Punto y origen</option>
+                            <option value="direction" ${mode === 'direction' ? 'selected' : ''}>Dirección y magnitud</option>
+                        </select>
+                    </div>
+                    <div class="vector-fields">
+                        ${buildVectorFields(mode, dim, { a: coordA, b: coordB, point: coordPoint, direction, magnitude, angle })}
+                    </div>
+                </div>
+            `;
+
+            const modeSelect = card.querySelector('.vector-mode');
+            modeSelect.addEventListener('change', () => {
+                const fields = card.querySelector('.vector-fields');
+                if (fields) {
+                    fields.innerHTML = buildVectorFields(modeSelect.value, vectorModuleState.dimension, { a: coordA, b: coordB, point: coordPoint, direction, magnitude, angle });
+                    attachVectorFieldListeners(card);
+                    renderVectorPlot();
+                    renderVectorSummary();
+                }
+            });
+
+            card.addEventListener('click', (event) => {
+                if (event.target.closest('input') || event.target.closest('select') || event.target.closest('.vector-delete-btn')) return;
+                selectVectorCard(card);
+            });
+
+            card.querySelector('.vector-delete-btn').addEventListener('click', () => {
+                card.remove();
+                syncVectorCardIndexes();
+                vectorModuleState.selectedIndices = vectorModuleState.selectedIndices.filter(index => index < document.querySelectorAll('.vector-card').length);
+                renderVectorPlot();
+                renderVectorSummary();
+            });
+            attachVectorFieldListeners(card);
+            list.appendChild(card);
+            syncVectorCardIndexes();
+        }
+
+        function attachVectorFieldListeners(card) {
+            card.querySelectorAll('input, select').forEach(node => {
+                node.addEventListener('input', () => {
+                    renderVectorPlot();
+                    renderVectorSummary();
+                });
+                node.addEventListener('change', () => {
+                    renderVectorPlot();
+                    renderVectorSummary();
+                });
+            });
+        }
+
+        function buildVectorFields(mode, dimension, values) {
+            const coordInputs = (prefix, baseValues) => {
+                const coords = Array.from({ length: dimension }, (_, index) => {
+                    const value = baseValues[index] ?? 0;
+                    return `<div class="vector-field-compact"><label class="vector-field-label">${dimension === 2 ? ['x', 'y'][index] : ['x', 'y', 'z'][index]}</label><input type="number" step="any" value="${Number(value).toFixed(2)}" data-vector-field="${prefix}-${index}"></div>`;
+                }).join('');
+                return coords;
+            };
+
+            if (mode === 'points') {
+                return `
+                    <div class="vector-coordinate-grid ${dimension === 3 ? 'three-cols' : ''}">
+                        <div>
+                            <div class="vector-field-label">P1</div>
+                            ${coordInputs('a', values.a || Array(dimension).fill(0))}
+                        </div>
+                        <div>
+                            <div class="vector-field-label">P2</div>
+                            ${coordInputs('b', values.b || Array(dimension).fill(0))}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (mode === 'origin') {
+                return `
+                    <div class="vector-coordinate-grid ${dimension === 3 ? 'three-cols' : ''}">
+                        <div>
+                            <div class="vector-field-label">Punto</div>
+                            ${coordInputs('point', values.point || Array(dimension).fill(0))}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (dimension === 2) {
+                return `
+                    <div class="vector-coordinate-grid">
+                        <div class="vector-field-compact">
+                            <label class="vector-field-label">Ángulo</label>
+                            <input type="number" step="any" value="${Number(values.angle ?? 45).toFixed(2)}" data-vector-field="angle">
+                        </div>
+                        <div class="vector-field-compact">
+                            <label class="vector-field-label">Magnitud</label>
+                            <input type="number" step="any" min="0" value="${Number(values.magnitude ?? 2).toFixed(2)}" data-vector-field="magnitude">
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="vector-coordinate-grid three-cols">
+                    ${coordInputs('direction', values.direction || Array(dimension).fill(0).map((_, index) => (index === 0 ? 1 : 0)))}
+                </div>
+                <div class="vector-field-compact" style="margin-top:10px;">
+                    <label class="vector-field-label">Magnitud</label>
+                    <input type="number" step="any" min="0" value="${Number(values.magnitude ?? 2).toFixed(2)}" data-vector-field="magnitude">
+                </div>
+            `;
+        }
+
+        function readVectorFromCard(card) {
+            const mode = card.querySelector('.vector-mode')?.value || 'points';
+            const dimension = Number(card.dataset.dimension || vectorModuleState.dimension || 2);
+            const readCoordArray = (prefix) => Array.from({ length: dimension }, (_, index) => {
+                const input = card.querySelector(`[data-vector-field="${prefix}-${index}"]`);
+                const value = Number.parseFloat(input?.value ?? '0');
+                return Number.isFinite(value) ? value : 0;
+            });
+
+            let vector = [0, 0, 0];
+            if (mode === 'points') {
+                const a = readCoordArray('a');
+                const b = readCoordArray('b');
+                vector = window.VectorOperations.vectorFromTwoPoints(a, b);
+            } else if (mode === 'origin') {
+                const point = readCoordArray('point');
+                vector = window.VectorOperations.vectorFromPointAndOrigin(point, Array(dimension).fill(0));
+            } else if (dimension === 2) {
+                const angle = Number.parseFloat(card.querySelector('[data-vector-field="angle"]')?.value ?? '0');
+                const magnitude = Number.parseFloat(card.querySelector('[data-vector-field="magnitude"]')?.value ?? '0');
+                vector = window.VectorOperations.vectorFromDirectionAndMagnitude(angle, magnitude);
+            } else {
+                const direction = readCoordArray('direction');
+                const magnitude = Number.parseFloat(card.querySelector('[data-vector-field="magnitude"]')?.value ?? '0');
+                vector = window.VectorOperations.vectorFromDirectionAndMagnitude(direction, magnitude);
+            }
+
+            return vector.slice(0, dimension);
+        }
+
+        function getVectorDisplayState() {
+            return Array.from(document.querySelectorAll('.vector-card')).map((card, index) => {
+                const vector = readVectorFromCard(card);
+                const offset = Array.isArray(vectorModuleState.dragOffsets[index]) ? vectorModuleState.dragOffsets[index] : [0, 0, 0];
+                const baseOffsets = Array.from({ length: Math.max(2, vector.length) }, (_, axis) => offset[axis] || 0);
+                const start = baseOffsets.map((value) => value);
+                const end = vector.map((value, axis) => value + (baseOffsets[axis] || 0));
+                return { card, vector, start, end };
+            }).filter(({ vector }) => vector && vector.length > 0 && vector.some(value => Number.isFinite(value)));
+        }
+
+        function getVectorCards() {
+            return getVectorDisplayState().map(({ vector }) => vector);
+        }
+
+        function getSelectedVectorCards() {
+            const selectedCards = Array.from(document.querySelectorAll('.vector-card.is-selected'));
+            return selectedCards.map(card => readVectorFromCard(card));
+        }
+
+        function renderVectorSummary() {
+            const summary = document.getElementById('vector-summary');
+            if (!summary) return;
+            const vectorEntries = getVectorDisplayState();
+
+            if (!vectorEntries.length) {
+                summary.innerHTML = '<p style="color: var(--muted); font-style: italic; margin: 0;">Agrega un vector para ver su magnitud y dirección.</p>';
+                return;
+            }
+
+            let html = vectorEntries.map(({ vector }, index) => {
+                const magnitude = window.VectorOperations.vectorMagnitude(vector);
+                const directionText = vectorModuleState.dimension === 2
+                    ? `${window.VectorOperations.directionAngle2D(vector).toFixed(1)}°`
+                    : `${window.VectorOperations.directionAzimuth(vector).toFixed(1)}° / ${window.VectorOperations.directionElevation(vector).toFixed(1)}°`;
+                return `<div class="vector-summary-item"><strong>v${index + 1}</strong> = ${formatVector(vector)} · Magnitud: ${magnitude.toFixed(3)} · Dirección: ${directionText}</div>`;
+            }).join('');
+
+            const selectedVectors = getSelectedVectorCards();
+            if (selectedVectors.length === 2) {
+                const [a, b] = selectedVectors;
+                const sum = a.map((value, index) => value + b[index]);
+                const diff = a.map((value, index) => value - b[index]);
+                html += `
+                    <div class="vector-selection-actions">
+                        <button type="button" class="vector-action-btn" data-vector-resultant="sum">Resultante suma</button>
+                        <button type="button" class="vector-action-btn" data-vector-resultant="diff">Resultante resta</button>
+                    </div>
+                    <div class="vector-summary-item"><strong>Resultado</strong>: ${formatVector(sum)} (suma) / ${formatVector(diff)} (resta)</div>
+                `;
+                summary.innerHTML = html;
+                summary.querySelectorAll('[data-vector-resultant]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const resultVector = button.dataset.vectorResultant === 'sum' ? sum : diff;
+                        const resultTitle = button.dataset.vectorResultant === 'sum' ? 'Resultante suma' : 'Resultante resta';
+                        const current = summary.querySelector('.vector-resultant-live');
+                        const el = document.createElement('div');
+                        el.className = 'vector-summary-item vector-resultant-live';
+                        el.innerHTML = `<strong>${resultTitle}</strong>: ${formatVector(resultVector)} · Magnitud: ${window.VectorOperations.vectorMagnitude(resultVector).toFixed(3)}`;
+                        if (current) current.replaceWith(el);
+                        else summary.appendChild(el);
+                    });
+                });
+                return;
+            }
+
+            summary.innerHTML = html;
+        }
+
+        function getSvgWorldCoordinate(event) {
+            const svg = document.getElementById('vector-canvas');
+            if (!svg) return { x: 0, y: 0 };
+            const rect = svg.getBoundingClientRect();
+            const width = 420;
+            const height = 320;
+            const padding = 28;
+            const x = ((event.clientX - rect.left) / rect.width) * width;
+            const y = ((event.clientY - rect.top) / rect.height) * height;
+            return { x, y, width, height, padding };
+        }
+
+        function handleVectorDragPointer(event) {
+            if (!vectorModuleState.dragState) return;
+            const { x, y, width, height, padding } = getSvgWorldCoordinate(event);
+            const state = vectorModuleState.dragState;
+            const range = Math.max(1, state.maxValue - state.minValue);
+            const dx = ((x - state.startX) / (width - padding * 2)) * range;
+            const dy = ((y - state.startY) / (height - padding * 2)) * range;
+            const offset = [...state.startOffset];
+            offset[0] = state.startOffset[0] + dx;
+            offset[1] = state.startOffset[1] - dy;
+            if (vectorModuleState.dimension === 3) offset[2] = state.startOffset[2];
+            vectorModuleState.dragOffsets[state.index] = offset;
+            renderVectorPlot();
+            renderVectorSummary();
+        }
+
+        function endVectorDrag() {
+            vectorModuleState.dragState = null;
+        }
+
+        function getVectorPlotBounds(states = getVectorDisplayState()) {
+            const allPoints = [];
+
+            states.forEach(({ start, end }) => {
+                if (vectorModuleState.dimension === 3) {
+                    const p1 = projectPoint3D(start);
+                    const p2 = projectPoint3D(end);
+                    allPoints.push(...p1, ...p2);
+                } else {
+                    allPoints.push(...start, ...end);
+                }
+            });
+
+            const minValue = Math.min(-2, ...allPoints, 0);
+            const maxValue = Math.max(2, ...allPoints, 0);
+            return {
+                minValue,
+                maxValue,
+                range: Math.max(1, maxValue - minValue)
+            };
+        }
+
+        function getGraphPointFromEvent(event) {
+            const svg = document.getElementById('vector-canvas');
+            if (!svg) return { x: 0, y: 0 };
+            const rect = svg.getBoundingClientRect();
+            const width = 420;
+            const height = 320;
+            const padding = 28;
+            const safeWidth = Math.max(1, width - padding * 2);
+            const safeHeight = Math.max(1, height - padding * 2);
+            const px = ((event.clientX - rect.left) / rect.width) * width;
+            const py = ((event.clientY - rect.top) / rect.height) * height;
+            const clampedX = Math.min(Math.max(px, padding), width - padding);
+            const clampedY = Math.min(Math.max(py, padding), height - padding);
+            const { minValue, maxValue, range } = getVectorPlotBounds();
+            const worldX = minValue + ((clampedX - padding) / safeWidth) * range;
+            const worldY = maxValue - ((clampedY - padding) / safeHeight) * range;
+            return {
+                x: Number(Number.isFinite(worldX) ? worldX.toFixed(2) : 0),
+                y: Number(Number.isFinite(worldY) ? worldY.toFixed(2) : 0)
+            };
+        }
+
+        function projectPoint3D(point) {
+            const [x, y, z] = point;
+            const yaw = Math.PI / 5;
+            const pitch = Math.PI / 7;
+            const x1 = x * Math.cos(yaw) + z * Math.sin(yaw);
+            const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw);
+            const y1 = y * Math.cos(pitch) - z1 * Math.sin(pitch);
+            return [x1, y1];
+        }
+
+        function renderVectorPlot() {
+            const svg = document.getElementById('vector-canvas');
+            if (!svg) return;
+
+            const states = getVectorDisplayState();
+            const width = 420;
+            const height = 320;
+            const padding = 28;
+            const { minValue, maxValue, range } = getVectorPlotBounds(states);
+
+            if (vectorModuleState.dragState) {
+                vectorModuleState.dragState.minValue = minValue;
+                vectorModuleState.dragState.maxValue = maxValue;
+            }
+
+            const mapX = value => padding + ((value - minValue) / range) * (width - padding * 2);
+            const mapY = value => height - padding - ((value - minValue) / range) * (height - padding * 2);
+
+            const axisColor = 'rgba(148,163,184,0.5)';
+            const axisLabels = [];
+            const grid = Array.from({ length: 7 }, (_, index) => {
+                const position = padding + (index / 6) * (width - padding * 2);
+                const value = Number((minValue + (index / 6) * range).toFixed(1));
+                axisLabels.push(`<text x="${position}" y="${height - 8}" fill="${axisColor}" font-size="10" text-anchor="middle">${value}</text>`);
+                return `<line x1="${position}" y1="${padding}" x2="${position}" y2="${height - padding}" stroke="rgba(148,163,184,0.14)" />`;
+            }).join('');
+
+            const xAxisY = mapY(0);
+            const yAxisX = mapX(0);
+            const originMarkup = `<line x1="${padding}" y1="${xAxisY}" x2="${width - padding}" y2="${xAxisY}" stroke="${axisColor}" stroke-dasharray="4 4" />
+                <line x1="${yAxisX}" y1="${padding}" x2="${yAxisX}" y2="${height - padding}" stroke="${axisColor}" stroke-dasharray="4 4" />
+                <text x="${width - 12}" y="${xAxisY - 10}" fill="${axisColor}" font-size="11" font-weight="700">x</text>
+                <text x="${yAxisX + 12}" y="${padding + 12}" fill="${axisColor}" font-size="11" font-weight="700">y</text>`;
+
+            if (vectorModuleState.dimension === 3) {
+                const zAxis = projectPoint3D([2, 0, 2]);
+                const zAxisX = mapX(zAxis[0]);
+                const zAxisY = mapY(zAxis[1]);
+                originMarkup += `<line x1="${yAxisX}" y1="${xAxisY}" x2="${zAxisX}" y2="${zAxisY}" stroke="${axisColor}" stroke-dasharray="4 4" />
+                    <text x="${zAxisX + 10}" y="${zAxisY - 12}" fill="${axisColor}" font-size="11" font-weight="700">z</text>`;
+            }
+
+            let draftMarkup = '';
+            if (vectorModuleState.graphDraftPoint && Number.isFinite(vectorModuleState.graphDraftPoint.x) && Number.isFinite(vectorModuleState.graphDraftPoint.y)) {
+                const draftX = mapX(vectorModuleState.graphDraftPoint.x);
+                const draftY = mapY(vectorModuleState.graphDraftPoint.y);
+                draftMarkup = `<circle cx="${draftX}" cy="${draftY}" r="5" fill="#f59e0b" stroke="#fff" stroke-width="2" />`;
+            }
+
+            const arrowHead = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb" /></marker></defs>';
+
+            const arrows = states.map(({ start, end, card }, index) => {
+                const start2D = vectorModuleState.dimension === 3 ? projectPoint3D(start) : start;
+                const end2D = vectorModuleState.dimension === 3 ? projectPoint3D(end) : end;
+                const x1 = mapX(start2D[0]);
+                const y1 = mapY(start2D[1]);
+                const x2 = mapX(end2D[0]);
+                const y2 = mapY(end2D[1]);
+                const color = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5];
+                const isSelected = card.classList.contains('is-selected');
+                return `
+                    <g data-vector-index="${index}" style="cursor: grab; ${isSelected ? 'filter: drop-shadow(0 0 4px rgba(37,99,235,.5));' : ''}" >
+                        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${isSelected ? 4 : 3}" marker-end="url(#arrowhead)" />
+                        <text x="${x2 + 8}" y="${y2 - 8}" fill="${color}" font-size="12" font-weight="700">v${index + 1}</text>
+                    </g>
+                `;
+            }).join('');
+
+            svg.innerHTML = `${arrowHead}${grid}${originMarkup}${axisLabels.join('')}${arrows}${draftMarkup}`;
+            svg.querySelectorAll('[data-vector-index]').forEach(group => {
+                group.addEventListener('pointerdown', (event) => {
+                    const index = Number(group.dataset.vectorIndex);
+                    const svgCoords = getSvgWorldCoordinate(event);
+                    vectorModuleState.selectedIndices = [index];
+                    applySelectedIndices();
+                    vectorModuleState.graphDraftPoint = null;
+                    vectorModuleState.dragState = {
+                        index,
+                        startX: svgCoords.x,
+                        startY: svgCoords.y,
+                        startOffset: [...(vectorModuleState.dragOffsets[index] || [0, 0, 0])],
+                        minValue: -2,
+                        maxValue: 2
+                    };
+                    event.preventDefault();
+                    svg.setPointerCapture(event.pointerId);
+                });
+            });
+            svg.onpointerdown = (event) => {
+                if (event.target.closest('[data-vector-index]')) return;
+                if (vectorModuleState.dragState) return;
+
+                const point = getGraphPointFromEvent(event);
+                if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+
+                if (!vectorModuleState.graphDraftPoint) {
+                    vectorModuleState.graphDraftPoint = point;
+                    renderVectorPlot();
+                    return;
+                }
+
+                const startPoint = [vectorModuleState.graphDraftPoint.x, vectorModuleState.graphDraftPoint.y];
+                const endPoint = [point.x, point.y];
+                addVectorCard({ a: startPoint, b: endPoint });
+                vectorModuleState.graphDraftPoint = null;
+                renderVectorPlot();
+                renderVectorSummary();
+            };
+            svg.onpointermove = handleVectorDragPointer;
+            svg.onpointerup = endVectorDrag;
+            svg.onpointerleave = endVectorDrag;
+        }
+
         function solveVectors() {
-            const uText = document.getElementById('vec-u').value;
-            const vText = document.getElementById('vec-v').value;
+            const uText = document.getElementById('vec-u')?.value || '';
+            const vText = document.getElementById('vec-v')?.value || '';
             const u = parseVector(uText);
             const v = parseVector(vText);
             const result = document.getElementById('vec-result');
             if (!u || !v) {
-                result.innerHTML = '<p style="color:red;">Ingresa dos vectores válidos.</p>';
+                if (result) result.innerHTML = '<p style="color:red;">Ingresa dos vectores válidos.</p>';
                 return;
             }
             const dot = u.reduce((sum, val, idx) => sum + val * v[idx], 0);
             const normU = Math.sqrt(u.reduce((sum, val) => sum + val * val, 0));
             const normV = Math.sqrt(v.reduce((sum, val) => sum + val * val, 0));
             const cos = dot / (normU * normV || 1);
-            result.innerHTML = `
-                <p><strong>u + v:</strong> ${formatVector(u.map((val, idx) => val + v[idx]))}</p>
-                <p><strong>u · v:</strong> ${dot.toFixed(4)}</p>
-                <p><strong>||u||:</strong> ${normU.toFixed(4)}</p>
-                <p><strong>||v||:</strong> ${normV.toFixed(4)}</p>
-                <p><strong>cosθ:</strong> ${cos.toFixed(4)}</p>
-            `;
+            if (result) {
+                result.innerHTML = `
+                    <p><strong>u + v:</strong> ${formatVector(u.map((val, idx) => val + v[idx]))}</p>
+                    <p><strong>u · v:</strong> ${dot.toFixed(4)}</p>
+                    <p><strong>||u||:</strong> ${normU.toFixed(4)}</p>
+                    <p><strong>||v||:</strong> ${normV.toFixed(4)}</p>
+                    <p><strong>cosθ:</strong> ${cos.toFixed(4)}</p>
+                `;
+            }
         }
 
         function parseVector(str) {
