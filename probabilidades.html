@@ -769,7 +769,7 @@
         }
 
         async function throwCoin() {
-            const outcome = Math.random() < 0.5 ? 'Cara' : 'Sello';
+            const outcome = Math.random() < 0.3 ? 'Cara' : 'Sello';
             await animateCoin(outcome);
             coinHistory.push(outcome);
             renderCoinLog();
