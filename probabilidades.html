@@ -250,6 +250,7 @@
             display: flex;
             gap: 8px;
             align-items: end;
+            height: 180px;
             min-height: 150px;
             margin-top: 18px;
             padding-top: 8px;
@@ -384,6 +385,100 @@
             animation: dieRoll 0.8s ease-in-out;
         }
 
+        .coin-die-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .coin-die-box {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .coin-die-coin {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fffef7, #facc15 22%, #f59e0b 60%, #d97706 100%);
+            border: 5px solid rgba(255,255,255,0.8);
+            box-shadow: 0 12px 28px rgba(245, 158, 11, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 2.1rem;
+            color: #7c2d12;
+        }
+
+        .coin-die-coin.spin {
+            animation: coinSpin 0.9s ease-in-out 2 alternate;
+        }
+
+        .coin-die-face {
+            width: 96px;
+            height: 96px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            border: 5px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .coin-die-face.roll {
+            animation: dieRoll 0.8s ease-in-out;
+        }
+
+        .double-dice-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .double-dice-box {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .double-dice-face {
+            width: 96px;
+            height: 96px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffffff, #e5e7eb);
+            border: 5px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            transition: transform 0.5s ease;
+        }
+
+        .double-dice-face.roll {
+            animation: dieRoll 0.8s ease-in-out;
+        }
+
         @keyframes dieRoll {
             0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
             20% { transform: rotateX(180deg) rotateY(90deg) scale(1.08); }
@@ -436,12 +531,13 @@
             align-items: center;
             justify-content: end;
             gap: 8px;
+            height: 100%;
         }
 
         .bar {
             width: 100%;
             min-height: 20px;
-            background: linear-gradient(180deg, #60a5fa, #2563eb);
+            height: 0;
             border-radius: 8px 8px 0 0;
             display: flex;
             align-items: flex-start;
@@ -450,11 +546,93 @@
             font-size: 12px;
             color: #fff;
             font-weight: 700;
+            box-shadow: inset 0 -10px 18px rgba(15, 23, 42, 0.08);
+            transition: height 0.35s ease;
         }
+
+        .bar-cara {
+            background: linear-gradient(180deg, #60a5fa, #2563eb);
+        }
+
+        .bar-sello {
+            background: linear-gradient(180deg, #f87171, #dc2626);
+        }
+
+        .bar-1 { background: linear-gradient(180deg, #60a5fa, #2563eb); }
+        .bar-2 { background: linear-gradient(180deg, #34d399, #059669); }
+        .bar-3 { background: linear-gradient(180deg, #c084fc, #7c3aed); }
+        .bar-4 { background: linear-gradient(180deg, #fbbf24, #f59e0b); }
+        .bar-5 { background: linear-gradient(180deg, #fb7185, #e11d48); }
+        .bar-6 { background: linear-gradient(180deg, #2dd4bf, #0f766e); }
 
         .bar-label {
             color: var(--muted);
             font-size: 0.8rem;
+        }
+
+        .baloto-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .baloto-ticket {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .baloto-ticket h4 {
+            margin: 0 0 12px;
+            color: var(--text);
+        }
+
+        .baloto-balls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .baloto-ball {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #f3f4f6 55%, #dbeafe 100%);
+            border: 2px solid rgba(15, 23, 42, 0.08);
+            box-shadow: inset 0 -4px 8px rgba(15, 23, 42, 0.08);
+            color: var(--text);
+        }
+
+        .baloto-ball.bonus {
+            background: radial-gradient(circle at 30% 30%, #fff1f2, #fca5a5 42%, #ef4444 100%);
+            color: white;
+            border-color: rgba(153, 27, 27, 0.2);
+        }
+
+        .baloto-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+            font-weight: 700;
+            color: var(--text);
+            flex-wrap: wrap;
+        }
+
+        .baloto-badge {
+            background: rgba(239, 68, 68, 0.08);
+            color: #b91c1c;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
         }
 
         .tree-panel {
@@ -462,6 +640,66 @@
             flex-direction: column;
             gap: 10px;
             margin-top: 14px;
+        }
+
+        .tree-scroll {
+            max-height: 560px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .tree-branches,
+        .tree-branches ul {
+            list-style: none;
+            margin: 0;
+            padding-left: 22px;
+        }
+
+        .tree-branches {
+            min-width: max-content;
+            padding-left: 0;
+        }
+
+        .tree-branches li {
+            position: relative;
+            padding: 5px 0 5px 18px;
+            border-left: 1px solid var(--border);
+        }
+
+        .tree-branches li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 18px;
+            width: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .tree-branches li:last-child {
+            border-left-color: transparent;
+        }
+
+        .tree-combinations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 220px;
+            overflow: auto;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel);
+        }
+
+        .tree-combination {
+            padding: 6px 9px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
         }
 
         .tree-level {
@@ -557,8 +795,11 @@
                         <option value="coin">1) Simulador de moneda</option>
                         <option value="tree">2) Diagrama de árbol</option>
                         <option value="die">3) Simulador de dado</option>
-                        <option value="classics">4) Otros ejemplos clásicos</option>
-                        <option value="venn">5) Diagrama de Venn</option>
+                        <option value="coin-die">4) Simulador de moneda y dado</option>
+                        <option value="double-dice">5) Simulador de dos dados</option>
+                        <option value="classics">6) Otros ejemplos clásicos</option>
+                        <option value="venn">7) Diagrama de Venn</option>
+                        <option value="baloto">8) Simulador del Baloto</option>
                     </select>
                 </div>
             </div>
@@ -610,15 +851,16 @@
                 </div>
                 <div class="controls">
                     <div class="field">
-                        <label for="tree-select">Tipo de experimento</label>
-                        <select id="tree-select">
-                            <option value="coin-die">Moneda + dado</option>
-                            <option value="two-coins">Dos monedas</option>
-                            <option value="urna">Bolsa con 3 rojas y 2 azules</option>
-                        </select>
+                        <label for="tree-outcomes">Espacio muestral (separa los resultados con coma)</label>
+                        <textarea id="tree-outcomes" rows="2">Cara, Sello</textarea>
                     </div>
-                    <button id="tree-draw" class="button primary">Generar árbol</button>
+                    <div class="field" style="max-width: 180px;">
+                        <label for="tree-repetitions">Número de repeticiones</label>
+                        <input id="tree-repetitions" type="number" min="1" max="10" value="3">
+                    </div>
+                    <button id="tree-draw" class="button primary">Generar diagrama</button>
                 </div>
+                <div id="tree-summary" class="result-box" aria-live="polite"></div>
                 <div id="tree-output" class="tree-panel"></div>
             </section>
         </div>
@@ -658,10 +900,85 @@
             </section>
         </div>
 
+        <div id="section-coin-die" class="prob-section">
+            <section class="prob-card experiment-panel">
+                <div class="module-header">
+                    <h3>4) Simulador de moneda y dado</h3>
+                </div>
+
+                <div class="controls">
+                    <button id="coin-die-roll" class="button primary">Lanzar</button>
+                    <button id="coin-die-reset" class="button secondary">Reiniciar</button>
+                </div>
+
+                <div class="coin-die-panel">
+                    <div class="coin-die-box">
+                        <div id="coin-die-coin" class="coin-die-coin" aria-label="Moneda">◐</div>
+                        <strong>Moneda</strong>
+                    </div>
+                    <div class="coin-die-box">
+                        <div id="coin-die-dice" class="coin-die-face" aria-label="Dado">⚀</div>
+                        <strong>Dado</strong>
+                    </div>
+                </div>
+
+                <div id="coin-die-result" class="coin-result-text">Listo para lanzar la moneda y el dado.</div>
+
+                <div class="result-box">
+                    <p><strong>Resultado combinado:</strong> <span id="coin-die-summary">Cara + 1</span></p>
+                    <p><strong>Espacio muestral:</strong> 12 resultados posibles (6 × 2).</p>
+                </div>
+
+                <div id="coin-die-log" class="coin-log" style="margin-top: 18px;"></div>
+            </section>
+        </div>
+
+        <div id="section-double-dice" class="prob-section">
+            <section class="prob-card experiment-panel">
+                <div class="module-header">
+                    <h3>5) Simulador de dos dados</h3>
+                    <select class="module-select" data-module="double-dice">
+                        <option value="simulacion">Simulación</option>
+                        <option value="suma">Suma</option>
+                    </select>
+                </div>
+
+                <div class="controls">
+                    <button id="double-dice-roll" class="button primary">Lanzar</button>
+                    <button id="double-dice-reset" class="button secondary">Reiniciar</button>
+                </div>
+
+                <div class="double-dice-panel">
+                    <div class="double-dice-box">
+                        <div id="double-dice-a" class="double-dice-face" aria-label="Dado 1">⚀</div>
+                        <strong>Dado 1</strong>
+                    </div>
+                    <div class="double-dice-box">
+                        <div id="double-dice-b" class="double-dice-face" aria-label="Dado 2">⚀</div>
+                        <strong>Dado 2</strong>
+                    </div>
+                </div>
+
+                <div id="double-dice-result" class="coin-result-text">Listo para lanzar dos dados.</div>
+
+                <div class="result-box">
+                    <p><strong>Suma:</strong> <span id="double-dice-sum">0</span></p>
+                    <p><strong>Frecuencia por suma:</strong> <span id="double-dice-summary">2: 0 · 3: 0 · 4: 0 · 5: 0 · 6: 0 · 7: 0 · 8: 0 · 9: 0 · 10: 0 · 11: 0 · 12: 0</span></p>
+                </div>
+
+                <div id="double-dice-bars" class="bars"></div>
+
+                <div style="margin-top: 18px;">
+                    <h5 style="margin: 0 0 8px; color: var(--text);">Registro de lanzamientos</h5>
+                    <ul id="double-dice-log" class="die-log"></ul>
+                </div>
+            </section>
+        </div>
+
         <div id="section-classics" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>4) Otros ejemplos clásicos</h3>
+                    <h3>6) Otros ejemplos clásicos</h3>
                     <select class="module-select" data-module="classics">
                         <option value="clasic">Clásicos</option>
                         <option value="suma">Suma</option>
@@ -672,6 +989,7 @@
                     <div class="field">
                         <label for="classic-select">Ejemplo</label>
                         <select id="classic-select">
+                            <option value="dice-coin">Lanzamiento de un dado perfecto y una moneda</option>
                             <option value="urna-same-color">Dos bolas de la misma color</option>
                             <option value="sum-two-dice">Suma de dos dados</option>
                             <option value="birthday">Probabilidad de cumpleaños repetido</option>
@@ -690,7 +1008,7 @@
         <div id="section-venn" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>5) Diagrama de Venn para el espacio muestral</h3>
+                    <h3>7) Diagrama de Venn para el espacio muestral</h3>
                     <select id="venn-select" class="module-select">
                         <option value="union">A ∪ B</option>
                         <option value="intersection">A ∩ B</option>
@@ -701,6 +1019,44 @@
                 </div>
                 <div id="venn-diagram" class="venn-visual"></div>
                 <div id="venn-description" class="result-box"></div>
+            </section>
+        </div>
+
+        <div id="section-baloto" class="prob-section">
+            <section class="prob-card experiment-panel">
+                <div class="module-header">
+                    <h3>8) Simulando el Juego del Baloto</h3>
+                    <span class="baloto-badge">1 en 15.401.568</span>
+                </div>
+
+                <div class="formula-box">
+                    <strong>Premio mayor:</strong> La probabilidad de ganar el premio mayor del Baloto en Colombia es de 1 en 15.401.568 combinaciones posibles.
+                </div>
+
+                <div class="baloto-panel">
+                    <div class="baloto-ticket">
+                        <h4>Tu boleto</h4>
+                        <div id="baloto-user-balls" class="baloto-balls"></div>
+                    </div>
+
+                    <div class="baloto-ticket">
+                        <h4>Sorteo</h4>
+                        <div id="baloto-draw-balls" class="baloto-balls"></div>
+                    </div>
+                </div>
+
+                <div class="baloto-meta">
+                    <div>Resultado: <span id="baloto-result">Aún no hay sorteo.</span></div>
+                    <div class="controls" style="margin: 0;">
+                        <button id="baloto-simulate" class="button primary">Generar sorteo</button>
+                        <button id="baloto-reset" class="button secondary">Reiniciar</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 18px;">
+                    <h5 style="margin: 0 0 8px; color: var(--text);">Historial de sorteos</h5>
+                    <ul id="baloto-history" class="coin-log"></ul>
+                </div>
             </section>
         </div>
     </div>
@@ -729,11 +1085,11 @@
             const maxCount = Math.max(heads, tails, 1);
             coinBars.innerHTML = `
                 <div class="bar-col">
-                    <div class="bar" style="height:${(heads / maxCount) * 100}%">${heads}</div>
+                    <div class="bar bar-cara" style="height:${(heads / maxCount) * 100}%">${heads}</div>
                     <div class="bar-label">Cara</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:${(tails / maxCount) * 100}%">${tails}</div>
+                    <div class="bar bar-sello" style="height:${(tails / maxCount) * 100}%">${tails}</div>
                     <div class="bar-label">Sello</div>
                 </div>
             `;
@@ -769,7 +1125,7 @@
         }
 
         async function throwCoin() {
-            const outcome = Math.random() < 0.3 ? 'Cara' : 'Sello';
+            const outcome = Math.random() < 0.1 ? 'Cara' : 'Sello';
             await animateCoin(outcome);
             coinHistory.push(outcome);
             renderCoinLog();
@@ -785,11 +1141,11 @@
             coinProbability.textContent = 'Cara 0.0% · Sello 0.0%';
             coinBars.innerHTML = `
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-cara" style="height:0%">0</div>
                     <div class="bar-label">Cara</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-sello" style="height:0%">0</div>
                     <div class="bar-label">Sello</div>
                 </div>
             `;
@@ -800,72 +1156,57 @@
         resetCoinSimulation();
 
         const treeOutput = document.getElementById('tree-output');
+        const treeOutcomesInput = document.getElementById('tree-outcomes');
+        const treeRepetitionsInput = document.getElementById('tree-repetitions');
+        const treeSummary = document.getElementById('tree-summary');
 
         function renderTreeDiagram() {
-            const type = document.getElementById('tree-select').value;
-            let html = '';
+            const outcomes = treeOutcomesInput.value.split(/[,,\n]/).map(value => value.trim()).filter(Boolean);
+            const repetitions = Number(treeRepetitionsInput.value);
 
-            if (type === 'coin-die') {
-                html = `
-                    <div class="tree-level">
-                        <span class="tree-node">Inicio</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">Cara</span>
-                        <span class="tree-node prob">Sello</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node">1,2,3,4,5,6</span>
-                        <span class="tree-node">1,2,3,4,5,6</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">12 resultados equiprobables: P = 1/12</span>
-                    </div>
-                `;
+            if (!outcomes.length || !Number.isInteger(repetitions) || repetitions < 1 || repetitions > 10) {
+                treeSummary.textContent = 'Ingresa al menos un resultado y entre 1 y 10 repeticiones.';
+                treeOutput.innerHTML = '';
+                return;
             }
 
-            if (type === 'two-coins') {
-                html = `
-                    <div class="tree-level">
-                        <span class="tree-node">Inicio</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">Cara</span>
-                        <span class="tree-node prob">Sello</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node">Cara / Sello</span>
-                        <span class="tree-node">Cara / Sello</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">Resultados: CC, CS, SC, SS</span>
-                    </div>
-                `;
+            const total = outcomes.length ** repetitions;
+            if (total > 1000) {
+                treeSummary.textContent = `Este espacio muestral produciría ${total.toLocaleString('es-CO')} combinaciones. Reduce los resultados o las repeticiones para mostrar un máximo de 1.000.`;
+                treeOutput.innerHTML = '';
+                return;
             }
 
-            if (type === 'urna') {
-                html = `
-                    <div class="tree-level">
-                        <span class="tree-node">Inicio</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">Roja (3/5)</span>
-                        <span class="tree-node prob">Azul (2/5)</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node">Roja (2/4) o Azul (2/4)</span>
-                        <span class="tree-node">Roja (3/4) o Azul (1/4)</span>
-                    </div>
-                    <div class="tree-level">
-                        <span class="tree-node prob">Probabilidad de dos rojas = (3/5) × (2/4) = 0.30</span>
-                    </div>
-                `;
+            const escapeHtml = value => value.replace(/[&<>"']/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[character]);
+            const combinations = [];
+
+            function buildBranches(prefix, depth) {
+                if (depth === repetitions) {
+                    combinations.push(prefix);
+                    return '';
+                }
+
+                return `<ul>${outcomes.map(outcome => {
+                    const next = [...prefix, outcome];
+                    return `<li><span class="tree-node">${escapeHtml(outcome)}</span>${buildBranches(next, depth + 1)}</li>`;
+                }).join('')}</ul>`;
             }
 
-            treeOutput.innerHTML = html;
+            const branches = buildBranches([], 0);
+            treeSummary.textContent = `${outcomes.length} resultados posibles por repetición · ${repetitions} repeticiones · ${total.toLocaleString('es-CO')} combinaciones.`;
+            treeOutput.innerHTML = `
+                <h4>Diagrama de árbol</h4>
+                <div class="tree-scroll"><ul class="tree-branches"><li><span class="tree-node prob">Inicio</span>${branches}</li></ul></div>
+                <h4>Todas las combinaciones</h4>
+                <div class="tree-combinations">${combinations.map(combination => `<span class="tree-combination">${combination.map(escapeHtml).join(' → ')}</span>`).join('')}</div>
+            `;
         }
 
         document.getElementById('tree-draw').addEventListener('click', renderTreeDiagram);
+        treeOutcomesInput.addEventListener('input', renderTreeDiagram);
+        treeRepetitionsInput.addEventListener('input', renderTreeDiagram);
         renderTreeDiagram();
 
         const dieResult = document.getElementById('die-result');
@@ -889,7 +1230,7 @@
 
             dieBars.innerHTML = Object.entries(counts).map(([label, count]) => `
                 <div class="bar-col">
-                    <div class="bar" style="height:${(count / maxCount) * 100}%">${count}</div>
+                    <div class="bar bar-${label}" style="height:${(count / maxCount) * 100}%">${count}</div>
                     <div class="bar-label">${label}</div>
                 </div>
             `).join('');
@@ -941,27 +1282,27 @@
             dieFrequency.textContent = '1: 0.0% · 2: 0.0% · 3: 0.0% · 4: 0.0% · 5: 0.0% · 6: 0.0%';
             dieBars.innerHTML = `
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-1" style="height:0%">0</div>
                     <div class="bar-label">1</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-2" style="height:0%">0</div>
                     <div class="bar-label">2</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-3" style="height:0%">0</div>
                     <div class="bar-label">3</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-4" style="height:0%">0</div>
                     <div class="bar-label">4</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-5" style="height:0%">0</div>
                     <div class="bar-label">5</div>
                 </div>
                 <div class="bar-col">
-                    <div class="bar" style="height:0%">0</div>
+                    <div class="bar bar-6" style="height:0%">0</div>
                     <div class="bar-label">6</div>
                 </div>
             `;
@@ -970,6 +1311,174 @@
         document.getElementById('die-simulate').addEventListener('click', throwDie);
         document.getElementById('die-reset').addEventListener('click', resetDieSimulation);
         resetDieSimulation();
+
+        const coinDieCoin = document.getElementById('coin-die-coin');
+        const coinDieDice = document.getElementById('coin-die-dice');
+        const coinDieResult = document.getElementById('coin-die-result');
+        const coinDieSummary = document.getElementById('coin-die-summary');
+        const coinDieLog = document.getElementById('coin-die-log');
+        let coinDieHistory = [];
+
+        function renderCoinDieLog() {
+            if (!coinDieHistory.length) {
+                coinDieLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+                return;
+            }
+
+            coinDieLog.innerHTML = coinDieHistory.map(([coin, die], index) => `
+                <li>
+                    <span><strong>Lanzamiento ${index + 1}</strong></span>
+                    <span class="badge ${coin === 'Cara' ? 'cara' : 'sello'}">${coin} + ${die}</span>
+                </li>
+            `).join('');
+        }
+
+        function animateCoinDie(coin, die) {
+            return new Promise((resolve) => {
+                coinDieCoin.classList.remove('spin');
+                coinDieDice.classList.remove('roll');
+                void coinDieCoin.offsetWidth;
+                void coinDieDice.offsetWidth;
+                coinDieCoin.classList.add('spin');
+                coinDieDice.classList.add('roll');
+                coinDieCoin.textContent = Math.random() < 0.5 ? '◐' : '◍';
+                coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][Math.floor(Math.random() * 6)];
+
+                setTimeout(() => {
+                    coinDieCoin.textContent = coin === 'Cara' ? 'C' : 'S';
+                    coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][die - 1];
+                    coinDieResult.textContent = `Resultado: ${coin} + ${die}`;
+                    coinDieSummary.textContent = `${coin} + ${die}`;
+                    resolve();
+                }, 700);
+            });
+        }
+
+        async function rollCoinDie() {
+            const coin = Math.random() < 0.5 ? 'Cara' : 'Sello';
+            const die = Math.floor(Math.random() * 6) + 1;
+            await animateCoinDie(coin, die);
+            coinDieHistory.push([coin, die]);
+            renderCoinDieLog();
+        }
+
+        function resetCoinDie() {
+            coinDieHistory = [];
+            coinDieCoin.textContent = '◐';
+            coinDieDice.textContent = '⚀';
+            coinDieResult.textContent = 'Listo para lanzar la moneda y el dado.';
+            coinDieSummary.textContent = 'Cara + 1';
+            coinDieLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+        }
+
+        document.getElementById('coin-die-roll').addEventListener('click', rollCoinDie);
+        document.getElementById('coin-die-reset').addEventListener('click', resetCoinDie);
+        resetCoinDie();
+
+        const doubleDiceA = document.getElementById('double-dice-a');
+        const doubleDiceB = document.getElementById('double-dice-b');
+        const doubleDiceResult = document.getElementById('double-dice-result');
+        const doubleDiceSum = document.getElementById('double-dice-sum');
+        const doubleDiceSummary = document.getElementById('double-dice-summary');
+        const doubleDiceBars = document.getElementById('double-dice-bars');
+        const doubleDiceLog = document.getElementById('double-dice-log');
+        const doubleDiceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        let doubleDiceHistory = [];
+
+        function renderDoubleDiceStats() {
+            const counts = { 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 };
+            doubleDiceHistory.forEach(([first, second]) => {
+                counts[first + second] = (counts[first + second] || 0) + 1;
+            });
+            const total = doubleDiceHistory.length || 1;
+            const maxCount = Math.max(...Object.values(counts), 1);
+
+            doubleDiceSum.textContent = doubleDiceHistory.length ? `${doubleDiceHistory[doubleDiceHistory.length - 1][0] + doubleDiceHistory[doubleDiceHistory.length - 1][1]}` : '0';
+            doubleDiceSummary.textContent = Object.entries(counts).map(([label, count]) => `${label}: ${count}`).join(' · ');
+            doubleDiceBars.innerHTML = Object.entries(counts).map(([label, count]) => {
+                const height = (count / maxCount) * 100;
+                const palette = {
+                    2: '#60a5fa', 3: '#34d399', 4: '#a78bfa', 5: '#fbbf24', 6: '#f472b6',
+                    7: '#f87171', 8: '#fb7185', 9: '#38bdf8', 10: '#14b8a6', 11: '#f59e0b', 12: '#ef4444'
+                };
+                return `
+                    <div class="bar-col">
+                        <div class="bar" style="height:${height}%; background:linear-gradient(180deg, ${palette[label]}, ${palette[label]}cc);">${count}</div>
+                        <div class="bar-label">${label}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDoubleDiceLog() {
+            if (!doubleDiceHistory.length) {
+                doubleDiceLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+                return;
+            }
+
+            doubleDiceLog.innerHTML = doubleDiceHistory.map(([first, second], index) => `
+                <li>
+                    <span><strong>Lanzamiento ${index + 1}</strong></span>
+                    <span class="badge">${first + second}</span>
+                </li>
+            `).join('');
+        }
+
+        function animateDoubleDice(valueA, valueB) {
+            return new Promise((resolve) => {
+                doubleDiceA.classList.remove('roll');
+                doubleDiceB.classList.remove('roll');
+                void doubleDiceA.offsetWidth;
+                void doubleDiceB.offsetWidth;
+                doubleDiceA.classList.add('roll');
+                doubleDiceB.classList.add('roll');
+                doubleDiceA.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
+                doubleDiceB.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
+
+                setTimeout(() => {
+                    doubleDiceA.textContent = doubleDiceFaces[valueA - 1];
+                    doubleDiceB.textContent = doubleDiceFaces[valueB - 1];
+                    doubleDiceResult.textContent = `Resultado: ${valueA} + ${valueB} = ${valueA + valueB}`;
+                    resolve();
+                }, 700);
+            });
+        }
+
+        async function rollDoubleDice() {
+            const valueA = Math.floor(Math.random() * 6) + 1;
+            const valueB = Math.floor(Math.random() * 6) + 1;
+            await animateDoubleDice(valueA, valueB);
+            doubleDiceHistory.push([valueA, valueB]);
+            renderDoubleDiceLog();
+            renderDoubleDiceStats();
+        }
+
+        function resetDoubleDice() {
+            doubleDiceHistory = [];
+            doubleDiceA.textContent = '⚀';
+            doubleDiceB.textContent = '⚀';
+            doubleDiceResult.textContent = 'Listo para lanzar dos dados.';
+            doubleDiceSum.textContent = '0';
+            doubleDiceLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+            doubleDiceSummary.textContent = '2: 0 · 3: 0 · 4: 0 · 5: 0 · 6: 0 · 7: 0 · 8: 0 · 9: 0 · 10: 0 · 11: 0 · 12: 0';
+            doubleDiceBars.innerHTML = `
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #60a5fa, #60a5fa);">0</div><div class="bar-label">2</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #34d399, #34d399);">0</div><div class="bar-label">3</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #a78bfa, #a78bfa);">0</div><div class="bar-label">4</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #fbbf24, #fbbf24);">0</div><div class="bar-label">5</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #f472b6, #f472b6);">0</div><div class="bar-label">6</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #f87171, #f87171);">0</div><div class="bar-label">7</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #fb7185, #fb7185);">0</div><div class="bar-label">8</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #38bdf8, #38bdf8);">0</div><div class="bar-label">9</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #14b8a6, #14b8a6);">0</div><div class="bar-label">10</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #f59e0b, #f59e0b);">0</div><div class="bar-label">11</div></div>
+                <div class="bar-col"><div class="bar" style="height:0%; background:linear-gradient(180deg, #ef4444, #ef4444);">0</div><div class="bar-label">12</div></div>
+            `;
+        }
+
+        document.getElementById('double-dice-roll').addEventListener('click', rollDoubleDice);
+        document.getElementById('double-dice-reset').addEventListener('click', resetDoubleDice);
+        resetDoubleDice();
 
         const classicSelect = document.getElementById('classic-select');
         const classicExtraWrap = document.getElementById('classic-extra-wrap');
@@ -986,6 +1495,19 @@
         function calculateClassicExample() {
             const option = classicSelect.value;
             let html = '';
+
+            if (option === 'dice-coin') {
+                html = `
+                    <div class="formula-box">
+                        <strong>Ejemplo:</strong> Lanzamiento de un dado perfecto y una moneda.
+                    </div>
+                    <div class="result-box">
+                        <p><strong>Espacio muestral:</strong> Ω = {1C, 2C, 3C, 4C, 5C, 6C, 1X, 2X, 3X, 4X, 5X, 6X}</p>
+                        <p><strong>Resultado:</strong> Un experimento aleatorio con 12 posibles resultados (6 × 2).</p>
+                        <p><strong>Interpretación:</strong> Cada valor del dado puede combinarse con cara o sello, por eso hay 12 resultados equiprobables.</p>
+                    </div>
+                `;
+            }
 
             if (option === 'urna-same-color') {
                 const probSameColor = (3/5) * (2/4) + (2/5) * (1/4);
@@ -1047,6 +1569,81 @@
 
             classicOutput.innerHTML = html;
         }
+
+        const balotoResult = document.getElementById('baloto-result');
+        const balotoUserBalls = document.getElementById('baloto-user-balls');
+        const balotoDrawBalls = document.getElementById('baloto-draw-balls');
+        const balotoHistory = document.getElementById('baloto-history');
+
+        function shuffleBalotoNumbers(maxValue, count) {
+            const numbers = Array.from({ length: maxValue }, (_, index) => index + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            return numbers.slice(0, count).sort((a, b) => a - b);
+        }
+
+        function renderBalotoBalls(container, values, isBonus = false) {
+            container.innerHTML = values.map((value) => `
+                <span class="baloto-ball ${isBonus ? 'bonus' : ''}">${value}</span>
+            `).join('');
+        }
+
+        function buildRandomBalotoTicket() {
+            return {
+                main: shuffleBalotoNumbers(45, 5),
+                bonus: Math.floor(Math.random() * 45) + 1
+            };
+        }
+
+        function simulateBaloto() {
+            const playerTicket = buildRandomBalotoTicket();
+            const draw = buildRandomBalotoTicket();
+            const matches = playerTicket.main.filter(value => draw.main.includes(value)).length;
+            const bonusMatch = playerTicket.bonus === draw.bonus;
+
+            renderBalotoBalls(balotoUserBalls, playerTicket.main);
+            renderBalotoBalls(balotoDrawBalls, [...draw.main, draw.bonus], true);
+
+            let message = `Coincidencias: ${matches} + ${bonusMatch ? 'balota roja' : 'sin balota roja'}.`;
+            if (matches === 5 && bonusMatch) {
+                message = '¡Premio mayor! Has ganado el Baloto.';
+            } else if (matches === 5) {
+                message = '¡Ganaste 5 números!';
+            } else if (matches === 4) {
+                message = '¡Ganaste 4 números!';
+            } else if (matches === 3) {
+                message = '¡Ganaste 3 números!';
+            } else if (bonusMatch) {
+                message = 'Acertaste la balota roja.';
+            }
+
+            balotoResult.textContent = message;
+
+            const item = document.createElement('li');
+            item.innerHTML = `
+                <span><strong>Sorteo ${balotoHistory.children.length + 1}</strong></span>
+                <span class="badge">${matches} + ${bonusMatch ? '1' : '0'}</span>
+            `;
+            balotoHistory.prepend(item);
+
+            while (balotoHistory.children.length > 5) {
+                balotoHistory.removeChild(balotoHistory.lastChild);
+            }
+        }
+
+        function resetBalotoSimulation() {
+            const placeholders = Array.from({ length: 5 }, (_, index) => index + 1);
+            renderBalotoBalls(balotoUserBalls, placeholders);
+            renderBalotoBalls(balotoDrawBalls, Array.from({ length: 5 }, (_, index) => index + 1), true);
+            balotoResult.textContent = 'Aún no hay sorteo.';
+            balotoHistory.innerHTML = '<li><span>No hay sorteos aún.</span></li>';
+        }
+
+        document.getElementById('baloto-simulate').addEventListener('click', simulateBaloto);
+        document.getElementById('baloto-reset').addEventListener('click', resetBalotoSimulation);
+        resetBalotoSimulation();
 
         const mainProbSelector = document.getElementById('main-prob-selector');
         const probSections = document.querySelectorAll('.prob-section');
