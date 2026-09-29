@@ -422,6 +422,18 @@
             animation: coinSpin 0.9s ease-in-out 2 alternate;
         }
 
+        #section-double-coin .coin-die-box:first-child .coin-die-coin {
+            background: radial-gradient(circle at 35% 35%, #eff6ff, #60a5fa 28%, #2563eb 68%, #1e3a8a 100%);
+            color: #eff6ff;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+        }
+
+        #section-double-coin .coin-die-box:nth-child(2) .coin-die-coin {
+            background: radial-gradient(circle at 35% 35%, #fff1f2, #fb7185 28%, #e11d48 68%, #881337 100%);
+            color: #fff1f2;
+            box-shadow: 0 12px 28px rgba(225, 29, 72, 0.25);
+        }
+
         .coin-die-face {
             width: 96px;
             height: 96px;
@@ -557,6 +569,11 @@
         .bar-sello {
             background: linear-gradient(180deg, #f87171, #dc2626);
         }
+
+        .bar-double-coin-cc { background: linear-gradient(180deg, #60a5fa, #1d4ed8); }
+        .bar-double-coin-cs { background: linear-gradient(180deg, #a78bfa, #7c3aed); }
+        .bar-double-coin-sc { background: linear-gradient(180deg, #fb7185, #e11d48); }
+        .bar-double-coin-ss { background: linear-gradient(180deg, #fbbf24, #d97706); }
 
         .bar-1 { background: linear-gradient(180deg, #60a5fa, #2563eb); }
         .bar-2 { background: linear-gradient(180deg, #34d399, #059669); }
@@ -793,13 +810,14 @@
                     <label for="main-prob-selector">Selecciona una sección</label>
                     <select id="main-prob-selector" class="module-select" style="min-width: 100%;">
                         <option value="coin">1) Simulador de moneda</option>
-                        <option value="tree">2) Diagrama de árbol</option>
-                        <option value="die">3) Simulador de dado</option>
-                        <option value="coin-die">4) Simulador de moneda y dado</option>
-                        <option value="double-dice">5) Simulador de dos dados</option>
-                        <option value="classics">6) Otros ejemplos clásicos</option>
-                        <option value="venn">7) Diagrama de Venn</option>
-                        <option value="baloto">8) Simulador del Baloto</option>
+                        <option value="double-coin">2) Simulador de dos monedas</option>
+                        <option value="tree">3) Diagrama de árbol</option>
+                        <option value="die">4) Simulador de dado</option>
+                        <option value="coin-die">5) Simulador de moneda y dado</option>
+                        <option value="double-dice">6) Simulador de dos dados</option>
+                        <option value="classics">7) Otros ejemplos clásicos</option>
+                        <option value="venn">8) Diagrama de Venn</option>
+                        <option value="baloto">9) Simulador del Baloto</option>
                     </select>
                 </div>
             </div>
@@ -839,10 +857,52 @@
             </section>
         </div>
 
+        <div id="section-double-coin" class="prob-section">
+            <section class="prob-card experiment-panel">
+                <div class="module-header">
+                    <h3>2) Simulador de dos monedas</h3>
+                    <select class="module-select" data-module="double-coin">
+                        <option value="simulacion">Simulación</option>
+                        <option value="frecuencias">Frecuencias</option>
+                    </select>
+                </div>
+
+                <div class="controls">
+                    <button id="double-coin-roll" class="button primary">Lanzar</button>
+                    <button id="double-coin-reset" class="button secondary">Reiniciar</button>
+                </div>
+
+                <div class="coin-die-panel">
+                    <div class="coin-die-box">
+                        <div id="double-coin-a" class="coin-die-coin" aria-label="Moneda 1">◐</div>
+                        <strong>Moneda 1</strong>
+                    </div>
+                    <div class="coin-die-box">
+                        <div id="double-coin-b" class="coin-die-coin" aria-label="Moneda 2">◐</div>
+                        <strong>Moneda 2</strong>
+                    </div>
+                </div>
+
+                <div id="double-coin-result" class="coin-result-text">Listo para lanzar dos monedas.</div>
+
+                <div class="result-box">
+                    <p><strong>Resultado combinado:</strong> <span id="double-coin-summary">Cara + Cara</span></p>
+                    <p><strong>Espacio muestral:</strong> 4 resultados posibles.</p>
+                </div>
+
+                <div id="double-coin-bars" class="bars"></div>
+
+                <div style="margin-top: 18px;">
+                    <h5 style="margin: 0 0 8px; color: var(--text);">Registro de lanzamientos</h5>
+                    <ul id="double-coin-log" class="coin-log"></ul>
+                </div>
+            </section>
+        </div>
+
         <div id="section-tree" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>2) Diagrama de árbol</h3>
+                    <h3>3) Diagrama de árbol</h3>
                     <select class="module-select" data-module="tree">
                         <option value="basico">Básico</option>
                         <option value="paso-a-paso">Paso a paso</option>
@@ -868,7 +928,7 @@
         <div id="section-die" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>3) Simulador de dado</h3>
+                    <h3>4) Simulador de dado</h3>
                     <select class="module-select" data-module="die">
                         <option value="uniforme">Uniforme</option>
                         <option value="estadistica">Estadística</option>
@@ -903,7 +963,7 @@
         <div id="section-coin-die" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>4) Simulador de moneda y dado</h3>
+                    <h3>5) Simulador de moneda y dado</h3>
                 </div>
 
                 <div class="controls">
@@ -936,7 +996,7 @@
         <div id="section-double-dice" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>5) Simulador de dos dados</h3>
+                    <h3>6) Simulador de dos dados</h3>
                     <select class="module-select" data-module="double-dice">
                         <option value="simulacion">Simulación</option>
                         <option value="suma">Suma</option>
@@ -978,7 +1038,7 @@
         <div id="section-classics" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>6) Otros ejemplos clásicos</h3>
+                    <h3>7) Otros ejemplos clásicos</h3>
                     <select class="module-select" data-module="classics">
                         <option value="clasic">Clásicos</option>
                         <option value="suma">Suma</option>
@@ -1008,7 +1068,7 @@
         <div id="section-venn" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>7) Diagrama de Venn para el espacio muestral</h3>
+                    <h3>8) Diagrama de Venn para el espacio muestral</h3>
                     <select id="venn-select" class="module-select">
                         <option value="union">A ∪ B</option>
                         <option value="intersection">A ∩ B</option>
@@ -1025,7 +1085,7 @@
         <div id="section-baloto" class="prob-section">
             <section class="prob-card experiment-panel">
                 <div class="module-header">
-                    <h3>8) Simulando el Juego del Baloto</h3>
+                    <h3>9) Simulando el Juego del Baloto</h3>
                     <span class="baloto-badge">1 en 15.401.568</span>
                 </div>
 
@@ -1154,6 +1214,93 @@
         document.getElementById('coin-simulate').addEventListener('click', throwCoin);
         document.getElementById('coin-reset').addEventListener('click', resetCoinSimulation);
         resetCoinSimulation();
+
+        const doubleCoinA = document.getElementById('double-coin-a');
+        const doubleCoinB = document.getElementById('double-coin-b');
+        const doubleCoinResult = document.getElementById('double-coin-result');
+        const doubleCoinSummary = document.getElementById('double-coin-summary');
+        const doubleCoinBars = document.getElementById('double-coin-bars');
+        const doubleCoinLog = document.getElementById('double-coin-log');
+        let doubleCoinHistory = [];
+
+        function renderDoubleCoinStats() {
+            const counts = {
+                'Cara + Cara': 0,
+                'Cara + Sello': 0,
+                'Sello + Cara': 0,
+                'Sello + Sello': 0
+            };
+            doubleCoinHistory.forEach(([first, second]) => counts[`${first} + ${second}`]++);
+            const maxCount = Math.max(...Object.values(counts), 1);
+
+            doubleCoinSummary.textContent = doubleCoinHistory.length
+                ? `${doubleCoinHistory[doubleCoinHistory.length - 1][0]} + ${doubleCoinHistory[doubleCoinHistory.length - 1][1]}`
+                : 'Cara + Cara';
+            const barClasses = ['bar-double-coin-cc', 'bar-double-coin-cs', 'bar-double-coin-sc', 'bar-double-coin-ss'];
+            doubleCoinBars.innerHTML = Object.entries(counts).map(([label, count], index) => `
+                <div class="bar-col">
+                    <div class="bar ${barClasses[index]}" style="height:${(count / maxCount) * 100}%">${count}</div>
+                    <div class="bar-label">${label.replace(' + ', ' / ')}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderDoubleCoinLog() {
+            if (!doubleCoinHistory.length) {
+                doubleCoinLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+                return;
+            }
+
+            doubleCoinLog.innerHTML = doubleCoinHistory.map(([first, second], index) => `
+                <li>
+                    <span><strong>Lanzamiento ${index + 1}</strong></span>
+                    <span class="badge ${first === 'Cara' && second === 'Cara' ? 'cara' : ''}">${first} + ${second}</span>
+                </li>
+            `).join('');
+        }
+
+        function animateDoubleCoin(first, second) {
+            return new Promise((resolve) => {
+                doubleCoinA.classList.remove('spin');
+                doubleCoinB.classList.remove('spin');
+                void doubleCoinA.offsetWidth;
+                void doubleCoinB.offsetWidth;
+                doubleCoinA.classList.add('spin');
+                doubleCoinB.classList.add('spin');
+                doubleCoinA.textContent = '◐';
+                doubleCoinB.textContent = '◍';
+
+                setTimeout(() => {
+                    doubleCoinA.textContent = first === 'Cara' ? 'C' : 'S';
+                    doubleCoinB.textContent = second === 'Cara' ? 'C' : 'S';
+                    doubleCoinResult.textContent = `Resultado: ${first} + ${second}`;
+                    resolve();
+                }, 700);
+            });
+        }
+
+        async function rollDoubleCoin() {
+            const first = Math.random() < 0.5 ? 'Cara' : 'Sello';
+            const second = Math.random() < 0.5 ? 'Cara' : 'Sello';
+            await animateDoubleCoin(first, second);
+            doubleCoinHistory.push([first, second]);
+            renderDoubleCoinLog();
+            renderDoubleCoinStats();
+        }
+
+        function resetDoubleCoin() {
+            doubleCoinHistory = [];
+            doubleCoinA.textContent = '◐';
+            doubleCoinB.textContent = '◐';
+            doubleCoinResult.textContent = 'Listo para lanzar dos monedas.';
+            doubleCoinSummary.textContent = 'Cara + Cara';
+            doubleCoinLog.innerHTML = '<li><span>No hay lanzamientos aún.</span></li>';
+            renderDoubleCoinStats();
+        }
+
+        document.getElementById('double-coin-roll').addEventListener('click', rollDoubleCoin);
+        document.getElementById('double-coin-reset').addEventListener('click', resetDoubleCoin);
+        resetDoubleCoin();
 
         const treeOutput = document.getElementById('tree-output');
         const treeOutcomesInput = document.getElementById('tree-outcomes');
