@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribuciones de probabilidad | Bachué Data Toolbox</title>
+    <link rel="icon" href="assets/favicon.ico">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.8.1/dist/css/foundation.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/formulas.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <link rel="stylesheet" href="css/themes/darkmode.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/themes/pinkmode.css">
+
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.5.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2025.5.1/core.js"></script>
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        body {
+            min-height: 100vh;
+        }
+
+        .distribution-page {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .distribution-intro {
+            margin: 0 0 20px;
+        }
+
+        .distribution-intro p {
+            margin-bottom: 0;
+        }
+
+        @media screen and (max-width: 39.9375em) {
+            .distribution-page {
+                padding: 16px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <a href="index.html" class="button secondary" style="margin: 0;">← Inicio</a>
+            <h4 style="display: inline-block; margin: 0 0 0 12px;">🎲 Distribuciones de probabilidad</h4>
+        </div>
+        <div class="top-bar-right">
+            <select id="theme-selector" class="theme-selector" aria-label="Seleccionar tema">
+                <option value="light">☀️ Light</option>
+                <option value="dark">🌙 Dark</option>
+                <option value="pink">🩷 Pink</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="distribution-page">
+        <section class="distribution-intro">
+            <h2>Calculadora de distribuciones</h2>
+            <p>Selecciona una distribución, configura sus parámetros y explora sus resultados, gráficos, tablas y fórmulas.</p>
+        </section>
+
+        <div class="grid-x grid-margin-x">
+            <aside class="cell small-12 medium-4 large-3 sidebar">
+                <div class="card">
+                    <div class="card-divider">Distribución</div>
+                    <div class="card-section">
+                        <select id="distribution-select" aria-label="Seleccionar distribución"></select>
+                    </div>
+                </div>
+                <div id="parameter-panel"></div>
+                <button id="calculate-btn" class="button expanded success">Calcular</button>
+            </aside>
+
+            <section class="cell small-12 medium-8 large-9" aria-label="Resultados de la distribución">
+                <div id="result-panel"></div>
+                <div id="summary-panel"></div>
+
+                <ul class="tabs" data-tabs id="results-tabs">
+                    <li class="tabs-title is-active"><a href="#graph-tab">Gráfico</a></li>
+                    <li class="tabs-title"><a href="#table-tab">Tabla</a></li>
+                    <li class="tabs-title"><a href="#formula-tab">Fórmula</a></li>
+                    <li class="tabs-title"><a href="#description-tab">Descripción</a></li>
+                    <li class="tabs-title"><a href="#interpretation-tab">Interpretación</a></li>
+                </ul>
+
+                <div class="tabs-content" data-tabs-content="results-tabs">
+                    <div class="tabs-panel is-active" id="graph-tab"><div id="chart-container"></div></div>
+                    <div class="tabs-panel" id="table-tab"><div id="table-container"></div></div>
+                    <div class="tabs-panel" id="formula-tab"><div id="formula-panel"></div></div>
+                    <div class="tabs-panel" id="description-tab"><div id="description-panel"></div></div>
+                    <div class="tabs-panel" id="interpretation-tab"><div id="interpretation-panel"></div></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites/dist/js/foundation.min.js"></script>
+    <script>$(document).foundation();</script>
+    <script src="js/theme.js"></script>
+    <script src="js/tabs.js"></script>
+    <script>
+        document.querySelectorAll('.tabs-title a').forEach(tab => {
+            tab.addEventListener('click', () => {
+                setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+            });
+        });
+    </script>
+
+    <py-config>
+        packages = ["numpy", "scipy", "plotly"]
+        [[fetch]]
+        from = "./pyscript"
+        files = [
+            "main.py", "router.py", "calculator_factory.py", "config.py",
+            "ui/panels.py", "ui/helpers.py", "ui/charts.py", "ui/tables.py", "ui/validation.py",
+            "distributions/discrete/binomial.py", "distributions/discrete/negative_binomial.py",
+            "estadistica/probability.py", "core/base_distribution.py", "core/discrete_distribution.py",
+            "core/continuous_distribution.py", "distributions/continuous/normal.py",
+            "distributions/continuous/exponential.py", "distributions/continuous/gamma.py",
+            "distributions/continuous/beta.py", "distributions/continuous/weibull.py",
+            "distributions/continuous/uniform.py", "distributions/continuous/lognormal.py",
+            "distributions/continuous/chi_square.py", "distributions/continuous/t_student.py",
+            "distributions/continuous/fisher.py", "estadistica/probability.py",
+            "estadistica/cumulative.py", "estadistica/intervals.py", "estadistica/descriptive.py",
+            "estadistica/moments.py", "estadistica/validators.py", "distributions/discrete/binomial.py",
+            "distributions/discrete/poisson.py", "distributions/discrete/negative_binomial.py",
+            "distributions/discrete/hypergeometric.py", "distributions/discrete/geometric.py",
+            "distributions/discrete/uniforme_discreta.py"
+        ]
+    </py-config>
+    <py-script src="./pyscript/main.py"></py-script>
+</body>
+</html>

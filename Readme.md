@@ -1,6 +1,7 @@
 calculadora-distribuciones/
 │
 ├── index.html                     # Página principal
+├── distribuciones.html            # Calculadora independiente de distribuciones
 ├── README.md
 │
 ├── assets/
