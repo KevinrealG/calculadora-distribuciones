@@ -257,6 +257,7 @@
         }
 
         .coin-doodle {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -288,7 +289,7 @@
         }
 
         .coin.spin {
-            animation: coinSpin 0.9s ease-in-out 2 alternate;
+            animation: coinSpin 1.25s cubic-bezier(0.22, 0.8, 0.32, 1) both;
         }
 
         @keyframes coinSpin {
@@ -353,6 +354,7 @@
         }
 
         .die-doodle {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -382,10 +384,11 @@
         }
 
         .die-face.roll {
-            animation: dieRoll 0.8s ease-in-out;
+            animation: dieRoll 1.25s cubic-bezier(0.22, 0.8, 0.32, 1) both;
         }
 
         .coin-die-panel {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 18px;
@@ -419,7 +422,7 @@
         }
 
         .coin-die-coin.spin {
-            animation: coinSpin 0.9s ease-in-out 2 alternate;
+            animation: coinSpin 1.25s cubic-bezier(0.22, 0.8, 0.32, 1) both;
         }
 
         #section-double-coin .coin-die-box:first-child .coin-die-coin {
@@ -450,10 +453,11 @@
         }
 
         .coin-die-face.roll {
-            animation: dieRoll 0.8s ease-in-out;
+            animation: dieRoll 1.25s cubic-bezier(0.22, 0.8, 0.32, 1) both;
         }
 
         .double-dice-panel {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 16px;
@@ -488,7 +492,7 @@
         }
 
         .double-dice-face.roll {
-            animation: dieRoll 0.8s ease-in-out;
+            animation: dieRoll 1.25s cubic-bezier(0.22, 0.8, 0.32, 1) both;
         }
 
         @keyframes dieRoll {
@@ -777,6 +781,31 @@
         .venn-visual svg {
             width: min(100%, 500px);
             height: auto;
+        }
+
+        .webgl-simulation-host {
+            position: relative;
+        }
+
+        .webgl-simulation-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .webgl-simulation-layer canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1123,6 +1152,278 @@
 
     <script src="js/theme.js"></script>
     <script>
+        const threeJsUrl = 'https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js';
+        let threeJsLoadPromise;
+        let sharedWebGLRenderer;
+        let cancelActiveWebGLAnimation;
+
+        function loadThreeJS() {
+            if (window.THREE) return Promise.resolve(window.THREE);
+            if (threeJsLoadPromise) return threeJsLoadPromise;
+
+            threeJsLoadPromise = new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = threeJsUrl;
+                script.async = true;
+                script.onload = () => {
+                    if (!window.THREE) {
+                        console.warn('Three.js no expuso su API global; se usará la animación CSS de respaldo.');
+                    }
+                    resolve(window.THREE || null);
+                };
+                script.onerror = () => {
+                    console.warn('No se pudo cargar Three.js; se usará la animación CSS de respaldo.');
+                    resolve(null);
+                };
+                document.head.appendChild(script);
+            });
+            return threeJsLoadPromise;
+        }
+
+        function makeCoinTexture(THREE, label, background, foreground) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            context.fillStyle = background;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.strokeStyle = 'rgba(255,255,255,0.75)';
+            context.lineWidth = 8;
+            context.beginPath();
+            context.arc(128, 128, 112, 0, Math.PI * 2);
+            context.stroke();
+            context.fillStyle = foreground;
+            context.font = 'bold 52px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(label, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function makeDieTexture(THREE, value) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#f8fafc';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.strokeStyle = '#cbd5e1';
+            context.lineWidth = 12;
+            context.strokeRect(6, 6, 244, 244);
+
+            const pipPositions = {
+                1: [[0, 0]],
+                2: [[-1, -1], [1, 1]],
+                3: [[-1, -1], [0, 0], [1, 1]],
+                4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+                5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+                6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]]
+            };
+            context.fillStyle = '#1d4ed8';
+            pipPositions[value].forEach(([x, y]) => {
+                context.beginPath();
+                context.arc(128 + x * 72, 128 + y * 72, 20, 0, Math.PI * 2);
+                context.fill();
+            });
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createWebGLObject(THREE, item, centerX, centerY) {
+            const size = Math.min(item.rect.width, item.rect.height) * 0.76;
+            let geometry;
+            let materials;
+            let endingRotation;
+
+            if (item.kind === 'coin') {
+                const isBlue = item.element.id === 'double-coin-a';
+                const isPink = item.element.id === 'double-coin-b';
+                const front = isBlue ? '#2563eb' : isPink ? '#e11d48' : '#f59e0b';
+                const back = isBlue ? '#60a5fa' : isPink ? '#fb7185' : '#facc15';
+                const edge = isBlue ? '#1e3a8a' : isPink ? '#881337' : '#b45309';
+                geometry = new THREE.CylinderGeometry(size * 0.47, size * 0.47, size * 0.12, 48);
+                materials = [
+                    new THREE.MeshStandardMaterial({ color: edge, metalness: 0.68, roughness: 0.3 }),
+                    new THREE.MeshStandardMaterial({
+                        map: makeCoinTexture(THREE, 'CARA', front, '#fff7ed'),
+                        metalness: 0.35,
+                        roughness: 0.34
+                    }),
+                    new THREE.MeshStandardMaterial({
+                        map: makeCoinTexture(THREE, 'SELLO', back, '#fff7ed'),
+                        metalness: 0.35,
+                        roughness: 0.34
+                    })
+                ];
+                endingRotation = item.value === 'Cara'
+                    ? [Math.PI / 2 + Math.PI * 8, Math.PI * 8, Math.PI * 4]
+                    : [-Math.PI / 2 + Math.PI * 8, Math.PI * 8, Math.PI * 4];
+            } else {
+                const faceMaterials = [2, 3, 4, 5, item.value, 6].map(value => (
+                    new THREE.MeshStandardMaterial({
+                        map: makeDieTexture(THREE, value),
+                        roughness: 0.42
+                    })
+                ));
+                geometry = new THREE.BoxGeometry(size * 0.82, size * 0.82, size * 0.82);
+                materials = faceMaterials;
+                endingRotation = [Math.PI * 6, Math.PI * 8, Math.PI * 4];
+            }
+
+            const mesh = new THREE.Mesh(geometry, materials);
+            mesh.position.set(centerX, centerY, 0);
+            mesh.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
+            mesh.userData.startRotation = [mesh.rotation.x, mesh.rotation.y, mesh.rotation.z];
+            mesh.userData.endingRotation = endingRotation;
+            mesh.userData.baseY = centerY;
+            mesh.userData.size = size;
+
+            const shadow = new THREE.Mesh(
+                new THREE.CircleGeometry(size * 0.42, 32),
+                new THREE.MeshBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.16 })
+            );
+            shadow.position.set(centerX + 5, centerY - size * 0.3, -8);
+            shadow.scale.y = 0.34;
+
+            return { mesh, shadow };
+        }
+
+        async function animateWebGLSimulation(items, duration = 1350) {
+            let THREE;
+            try {
+                THREE = await loadThreeJS();
+            } catch (error) {
+                console.warn('Three.js no está disponible; se usará la animación CSS de respaldo.', error);
+                return false;
+            }
+            if (!THREE || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+
+            if (cancelActiveWebGLAnimation) cancelActiveWebGLAnimation();
+
+            const container = items[0].element.closest(
+                '.coin-doodle, .die-doodle, .coin-die-panel, .double-dice-panel'
+            );
+            if (!container) return false;
+
+            const containerRect = container.getBoundingClientRect();
+            if (!containerRect.width || !containerRect.height) return false;
+
+            let renderer;
+            try {
+                if (!sharedWebGLRenderer) {
+                    sharedWebGLRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                    sharedWebGLRenderer.setClearColor(0x000000, 0);
+                }
+                renderer = sharedWebGLRenderer;
+            } catch (error) {
+                console.warn('WebGL no está disponible; se usará la animación CSS de respaldo.', error);
+                return false;
+            }
+
+            return new Promise(resolve => {
+                const scene = new THREE.Scene();
+                const camera = new THREE.OrthographicCamera(
+                    -containerRect.width / 2,
+                    containerRect.width / 2,
+                    containerRect.height / 2,
+                    -containerRect.height / 2,
+                    0.1,
+                    1000
+                );
+                camera.position.z = 500;
+                scene.add(new THREE.AmbientLight(0xffffff, 2.1));
+                const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+                keyLight.position.set(-100, 160, 260);
+                scene.add(keyLight);
+
+                const layer = document.createElement('div');
+                layer.className = 'webgl-simulation-layer';
+                layer.setAttribute('aria-hidden', 'true');
+                container.classList.add('webgl-simulation-host');
+                container.appendChild(layer);
+                layer.appendChild(renderer.domElement);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+                const previousVisibility = items.map(({ element }) => element.style.visibility);
+                items.forEach(({ element }) => { element.style.visibility = 'hidden'; });
+                const objects = items.map(item => {
+                    const rect = item.element.getBoundingClientRect();
+                    const centerX = rect.left - containerRect.left + rect.width / 2 - containerRect.width / 2;
+                    const centerY = containerRect.height / 2 - (rect.top - containerRect.top + rect.height / 2);
+                    const object = createWebGLObject(THREE, { ...item, rect }, centerX, centerY);
+                    scene.add(object.mesh, object.shadow);
+                    return object;
+                });
+
+                const startedAt = performance.now();
+                let finished = false;
+                let frameId;
+                const cleanup = completed => {
+                    if (finished) return;
+                    finished = true;
+                    cancelAnimationFrame(frameId);
+                    if (cancelActiveWebGLAnimation === cancel) cancelActiveWebGLAnimation = null;
+                    objects.forEach(({ mesh, shadow }) => {
+                        mesh.geometry.dispose();
+                        mesh.material.forEach(material => {
+                            if (material.map) material.map.dispose();
+                            material.dispose();
+                        });
+                        shadow.geometry.dispose();
+                        shadow.material.dispose();
+                    });
+                    items.forEach(({ element }, index) => {
+                        element.style.visibility = previousVisibility[index];
+                    });
+                    layer.remove();
+                    container.classList.remove('webgl-simulation-host');
+                    resolve(completed);
+                };
+                const cancel = () => cleanup(false);
+                cancelActiveWebGLAnimation = cancel;
+
+                const renderFrame = now => {
+                    if (finished) return;
+                    const progress = Math.min((now - startedAt) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const currentRect = container.getBoundingClientRect();
+                    if (currentRect.width && currentRect.height) {
+                        renderer.setSize(currentRect.width, currentRect.height, false);
+                        camera.left = -currentRect.width / 2;
+                        camera.right = currentRect.width / 2;
+                        camera.top = currentRect.height / 2;
+                        camera.bottom = -currentRect.height / 2;
+                        camera.updateProjectionMatrix();
+                    }
+
+                    objects.forEach(({ mesh, shadow }, index) => {
+                        const { startRotation, endingRotation, baseY, size } = mesh.userData;
+                        mesh.rotation.set(
+                            startRotation[0] + (endingRotation[0] - startRotation[0]) * eased,
+                            startRotation[1] + (endingRotation[1] - startRotation[1]) * eased,
+                            startRotation[2] + (endingRotation[2] - startRotation[2]) * eased
+                        );
+                        mesh.position.y = baseY + Math.sin(progress * Math.PI * 3) * size * 0.24 * (1 - progress);
+                        mesh.scale.setScalar(1 + Math.sin(progress * Math.PI) * 0.16);
+                        shadow.material.opacity = 0.1 + progress * 0.1;
+                    });
+
+                    renderer.render(scene, camera);
+                    if (progress < 1) {
+                        frameId = requestAnimationFrame(renderFrame);
+                    } else {
+                        cleanup(true);
+                    }
+                };
+
+                frameId = requestAnimationFrame(renderFrame);
+            });
+        }
+
+        async function waitForFallbackAnimation() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            await new Promise(resolve => setTimeout(resolve, 1250));
+        }
+
         const coinResult = document.getElementById('coin-result');
         const coinBars = document.getElementById('coin-bars');
         const coinLog = document.getElementById('coin-log');
@@ -1169,19 +1470,17 @@
             `).join('');
         }
 
-        function animateCoin(result) {
-            return new Promise((resolve) => {
-                coinVisual.classList.remove('spin');
-                void coinVisual.offsetWidth;
-                coinVisual.classList.add('spin');
-                coinVisual.textContent = result === 'Cara' ? '◐' : '◍';
+        async function animateCoin(result) {
+            coinVisual.classList.remove('spin');
+            void coinVisual.offsetWidth;
+            coinVisual.classList.add('spin');
+            coinVisual.textContent = result === 'Cara' ? '◐' : '◍';
 
-                setTimeout(() => {
-                    coinVisual.textContent = result === 'Cara' ? 'C' : 'S';
-                    coinResult.textContent = `Resultado: ${result}`;
-                    resolve();
-                }, 700);
-            });
+            const rendered = await animateWebGLSimulation([{ element: coinVisual, kind: 'coin', value: result }]);
+            if (!rendered) await waitForFallbackAnimation();
+            coinVisual.classList.remove('spin');
+            coinVisual.textContent = result === 'Cara' ? 'C' : 'S';
+            coinResult.textContent = `Resultado: ${result}`;
         }
 
         async function throwCoin() {
@@ -1259,24 +1558,26 @@
             `).join('');
         }
 
-        function animateDoubleCoin(first, second) {
-            return new Promise((resolve) => {
-                doubleCoinA.classList.remove('spin');
-                doubleCoinB.classList.remove('spin');
-                void doubleCoinA.offsetWidth;
-                void doubleCoinB.offsetWidth;
-                doubleCoinA.classList.add('spin');
-                doubleCoinB.classList.add('spin');
-                doubleCoinA.textContent = '◐';
-                doubleCoinB.textContent = '◍';
+        async function animateDoubleCoin(first, second) {
+            doubleCoinA.classList.remove('spin');
+            doubleCoinB.classList.remove('spin');
+            void doubleCoinA.offsetWidth;
+            void doubleCoinB.offsetWidth;
+            doubleCoinA.classList.add('spin');
+            doubleCoinB.classList.add('spin');
+            doubleCoinA.textContent = '◐';
+            doubleCoinB.textContent = '◍';
 
-                setTimeout(() => {
-                    doubleCoinA.textContent = first === 'Cara' ? 'C' : 'S';
-                    doubleCoinB.textContent = second === 'Cara' ? 'C' : 'S';
-                    doubleCoinResult.textContent = `Resultado: ${first} + ${second}`;
-                    resolve();
-                }, 700);
-            });
+            const rendered = await animateWebGLSimulation([
+                { element: doubleCoinA, kind: 'coin', value: first },
+                { element: doubleCoinB, kind: 'coin', value: second }
+            ]);
+            if (!rendered) await waitForFallbackAnimation();
+            doubleCoinA.classList.remove('spin');
+            doubleCoinB.classList.remove('spin');
+            doubleCoinA.textContent = first === 'Cara' ? 'C' : 'S';
+            doubleCoinB.textContent = second === 'Cara' ? 'C' : 'S';
+            doubleCoinResult.textContent = `Resultado: ${first} + ${second}`;
         }
 
         async function rollDoubleCoin() {
@@ -1397,19 +1698,17 @@
             `).join('');
         }
 
-        function animateDie(value) {
-            return new Promise((resolve) => {
-                dieVisual.classList.remove('roll');
-                void dieVisual.offsetWidth;
-                dieVisual.classList.add('roll');
-                dieVisual.textContent = dieFaces[Math.floor(Math.random() * dieFaces.length)];
+        async function animateDie(value) {
+            dieVisual.classList.remove('roll');
+            void dieVisual.offsetWidth;
+            dieVisual.classList.add('roll');
+            dieVisual.textContent = dieFaces[Math.floor(Math.random() * dieFaces.length)];
 
-                setTimeout(() => {
-                    dieVisual.textContent = dieFaces[value - 1];
-                    dieResult.textContent = `Resultado: ${value}`;
-                    resolve();
-                }, 700);
-            });
+            const rendered = await animateWebGLSimulation([{ element: dieVisual, kind: 'die', value }]);
+            if (!rendered) await waitForFallbackAnimation();
+            dieVisual.classList.remove('roll');
+            dieVisual.textContent = dieFaces[value - 1];
+            dieResult.textContent = `Resultado: ${value}`;
         }
 
         async function throwDie() {
@@ -1480,25 +1779,27 @@
             `).join('');
         }
 
-        function animateCoinDie(coin, die) {
-            return new Promise((resolve) => {
-                coinDieCoin.classList.remove('spin');
-                coinDieDice.classList.remove('roll');
-                void coinDieCoin.offsetWidth;
-                void coinDieDice.offsetWidth;
-                coinDieCoin.classList.add('spin');
-                coinDieDice.classList.add('roll');
-                coinDieCoin.textContent = Math.random() < 0.5 ? '◐' : '◍';
-                coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][Math.floor(Math.random() * 6)];
+        async function animateCoinDie(coin, die) {
+            coinDieCoin.classList.remove('spin');
+            coinDieDice.classList.remove('roll');
+            void coinDieCoin.offsetWidth;
+            void coinDieDice.offsetWidth;
+            coinDieCoin.classList.add('spin');
+            coinDieDice.classList.add('roll');
+            coinDieCoin.textContent = Math.random() < 0.5 ? '◐' : '◍';
+            coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][Math.floor(Math.random() * 6)];
 
-                setTimeout(() => {
-                    coinDieCoin.textContent = coin === 'Cara' ? 'C' : 'S';
-                    coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][die - 1];
-                    coinDieResult.textContent = `Resultado: ${coin} + ${die}`;
-                    coinDieSummary.textContent = `${coin} + ${die}`;
-                    resolve();
-                }, 700);
-            });
+            const rendered = await animateWebGLSimulation([
+                { element: coinDieCoin, kind: 'coin', value: coin },
+                { element: coinDieDice, kind: 'die', value: die }
+            ]);
+            if (!rendered) await waitForFallbackAnimation();
+            coinDieCoin.classList.remove('spin');
+            coinDieDice.classList.remove('roll');
+            coinDieCoin.textContent = coin === 'Cara' ? 'C' : 'S';
+            coinDieDice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][die - 1];
+            coinDieResult.textContent = `Resultado: ${coin} + ${die}`;
+            coinDieSummary.textContent = `${coin} + ${die}`;
         }
 
         async function rollCoinDie() {
@@ -1571,24 +1872,26 @@
             `).join('');
         }
 
-        function animateDoubleDice(valueA, valueB) {
-            return new Promise((resolve) => {
-                doubleDiceA.classList.remove('roll');
-                doubleDiceB.classList.remove('roll');
-                void doubleDiceA.offsetWidth;
-                void doubleDiceB.offsetWidth;
-                doubleDiceA.classList.add('roll');
-                doubleDiceB.classList.add('roll');
-                doubleDiceA.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
-                doubleDiceB.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
+        async function animateDoubleDice(valueA, valueB) {
+            doubleDiceA.classList.remove('roll');
+            doubleDiceB.classList.remove('roll');
+            void doubleDiceA.offsetWidth;
+            void doubleDiceB.offsetWidth;
+            doubleDiceA.classList.add('roll');
+            doubleDiceB.classList.add('roll');
+            doubleDiceA.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
+            doubleDiceB.textContent = doubleDiceFaces[Math.floor(Math.random() * doubleDiceFaces.length)];
 
-                setTimeout(() => {
-                    doubleDiceA.textContent = doubleDiceFaces[valueA - 1];
-                    doubleDiceB.textContent = doubleDiceFaces[valueB - 1];
-                    doubleDiceResult.textContent = `Resultado: ${valueA} + ${valueB} = ${valueA + valueB}`;
-                    resolve();
-                }, 700);
-            });
+            const rendered = await animateWebGLSimulation([
+                { element: doubleDiceA, kind: 'die', value: valueA },
+                { element: doubleDiceB, kind: 'die', value: valueB }
+            ]);
+            if (!rendered) await waitForFallbackAnimation();
+            doubleDiceA.classList.remove('roll');
+            doubleDiceB.classList.remove('roll');
+            doubleDiceA.textContent = doubleDiceFaces[valueA - 1];
+            doubleDiceB.textContent = doubleDiceFaces[valueB - 1];
+            doubleDiceResult.textContent = `Resultado: ${valueA} + ${valueB} = ${valueA + valueB}`;
         }
 
         async function rollDoubleDice() {
