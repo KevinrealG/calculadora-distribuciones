@@ -15,7 +15,7 @@ from scipy.stats import nbinom
 from core.discrete_distribution import DiscreteDistribution
 from calculator_factory import CalculatorFactory
 
-from ui.panels import NumberField, SliderField, SelectField
+from ui.panels import NumberField, SelectField
 from ui.helpers import int_value, float_value, selected_value
 from ui.validation import Validator
 
@@ -62,7 +62,7 @@ class NegativeBinomial(DiscreteDistribution):
                 minimum=1
             ),
 
-            SliderField(
+            NumberField(
                 id="p",
                 label="Probabilidad de éxito (p)",
                 value=self.p,

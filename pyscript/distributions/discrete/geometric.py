@@ -15,7 +15,7 @@ from scipy.stats import geom
 from core.discrete_distribution import DiscreteDistribution
 from calculator_factory import CalculatorFactory
 
-from ui.panels import NumberField, SliderField
+from ui.panels import NumberField
 from ui.helpers import int_value, float_value
 from ui.validation import geometric as geometric_validation
 
@@ -41,7 +41,7 @@ class Geometric(DiscreteDistribution):
 
         return [
 
-            SliderField(
+            NumberField(
                 id="p",
                 label="Probabilidad de éxito (p)",
                 value=self.p,
